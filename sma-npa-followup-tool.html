@@ -1,0 +1,1931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMA / NPA Account Follow-Up Tool</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --primary: #2c5282;
+    --primary-light: #ebf4ff;
+    --danger: #c53030;
+    --danger-light: #fff5f5;
+    --warning: #dd6b20;
+    --warning-light: #fffaf0;
+    --success: #276749;
+    --success-light: #f0fff4;
+    --info: #2b6cb0;
+    --info-light: #ebf8ff;
+    --gray-100: #f7fafc;
+    --gray-200: #edf2f7;
+    --gray-300: #e2e8f0;
+    --gray-400: #cbd5e0;
+    --gray-500: #a0aec0;
+    --gray-600: #718096;
+    --gray-700: #4a5568;
+    --gray-800: #2d3748;
+    --border: #e2e8f0;
+    --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+    --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.06);
+    --radius: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--gray-800);
+    line-height: 1.5;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, var(--primary), #1a365d);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-md);
+  }
+  .header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+  .header-sub { font-size: 12px; opacity: .8; margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+    white-space: nowrap;
+  }
+  .btn:hover { filter: brightness(.92); }
+  .btn-primary { background: #3182ce; color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-warning { background: var(--warning); color: #fff; }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--gray-300);
+    color: var(--gray-700);
+  }
+  .btn-outline:hover { background: var(--gray-100); }
+  .btn-sm { padding: 5px 10px; font-size: 12px; }
+  .btn-white { background: rgba(255,255,255,.15); color: #fff; border: 1px solid rgba(255,255,255,.25); }
+  .btn-white:hover { background: rgba(255,255,255,.25); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    gap: 0;
+  }
+  .tab {
+    padding: 12px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--gray-500);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all .15s;
+  }
+  .tab:hover { color: var(--gray-700); }
+  .tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+  /* Main Layout */
+  .main { padding: 20px 24px; max-width: 1400px; margin: 0 auto; }
+
+  /* Dashboard Cards */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    box-shadow: var(--shadow);
+    border-left: 4px solid var(--gray-400);
+    cursor: pointer;
+    transition: transform .1s, box-shadow .1s;
+  }
+  .stat-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+  .stat-card.sma0 { border-left-color: #48bb78; }
+  .stat-card.sma1 { border-left-color: #ecc94b; }
+  .stat-card.sma2 { border-left-color: var(--warning); }
+  .stat-card.npa { border-left-color: var(--danger); }
+  .stat-card.total { border-left-color: var(--primary); }
+  .stat-card.resolved { border-left-color: var(--success); }
+  .stat-label { font-size: 12px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; letter-spacing: .5px; }
+  .stat-value { font-size: 28px; font-weight: 700; margin-top: 4px; }
+  .stat-amount { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+
+  /* Section Card */
+  .card {
+    background: var(--card);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .card-header h2 { font-size: 15px; font-weight: 700; }
+  .card-body { padding: 20px; }
+
+  /* Filters */
+  .filters {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 3px; }
+  .filter-group label { font-size: 11px; font-weight: 600; color: var(--gray-500); text-transform: uppercase; }
+
+  /* Form Controls */
+  input[type="text"], input[type="number"], input[type="date"], input[type="tel"],
+  input[type="email"], select, textarea {
+    padding: 8px 12px;
+    border: 1.5px solid var(--gray-300);
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--gray-800);
+    background: #fff;
+    transition: border-color .15s;
+    width: 100%;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(44,82,130,.1);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+
+  /* Table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--gray-100);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--gray-600);
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { background: var(--gray-200); }
+  td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--gray-200);
+    vertical-align: middle;
+  }
+  tr:hover td { background: var(--gray-100); }
+
+  /* Badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .3px;
+  }
+  .badge-sma0 { background: #c6f6d5; color: #22543d; }
+  .badge-sma1 { background: #fefcbf; color: #744210; }
+  .badge-sma2 { background: #feebc8; color: #7b341e; }
+  .badge-npa { background: #fed7d7; color: #822727; }
+  .badge-substandard { background: #fed7d7; color: #822727; }
+  .badge-doubtful { background: #e9d8fd; color: #44337a; }
+  .badge-loss { background: #1a202c; color: #fff; }
+  .badge-resolved { background: #c6f6d5; color: #22543d; }
+
+  .priority-high { color: var(--danger); font-weight: 700; }
+  .priority-medium { color: var(--warning); font-weight: 700; }
+  .priority-low { color: var(--success); font-weight: 700; }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.4);
+    z-index: 200;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 720px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.15);
+    animation: modalIn .2s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+  .modal-header {
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-header h2 { font-size: 17px; }
+  .modal-close {
+    width: 32px; height: 32px;
+    border: none; background: var(--gray-100);
+    border-radius: 6px; cursor: pointer;
+    font-size: 18px; color: var(--gray-600);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-close:hover { background: var(--gray-200); }
+  .modal-body { padding: 24px; }
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  /* Form Grid */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 4px; }
+  .form-group label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-700);
+  }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group .required::after { content: ' *'; color: var(--danger); }
+
+  /* Follow-up Timeline */
+  .timeline { padding: 10px 0; }
+  .timeline-item {
+    display: flex;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--gray-200);
+  }
+  .timeline-item:last-child { border-bottom: none; }
+  .timeline-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--primary);
+    margin-top: 5px;
+    flex-shrink: 0;
+  }
+  .timeline-dot.call { background: #3182ce; }
+  .timeline-dot.visit { background: #38a169; }
+  .timeline-dot.notice { background: #d69e2e; }
+  .timeline-dot.legal { background: #e53e3e; }
+  .timeline-dot.email { background: #805ad5; }
+  .timeline-dot.restructure { background: #dd6b20; }
+  .timeline-content { flex: 1; }
+  .timeline-meta {
+    display: flex;
+    gap: 12px;
+    font-size: 11px;
+    color: var(--gray-500);
+    margin-bottom: 3px;
+  }
+  .timeline-meta strong { color: var(--gray-700); }
+  .timeline-text { font-size: 13px; }
+  .timeline-response {
+    margin-top: 6px;
+    padding: 8px 12px;
+    background: var(--gray-100);
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--gray-600);
+  }
+
+  /* DPD indicator */
+  .dpd { font-weight: 700; }
+  .dpd-ok { color: var(--success); }
+  .dpd-warn { color: var(--warning); }
+  .dpd-critical { color: var(--danger); }
+
+  /* Aging bar */
+  .aging-bar {
+    height: 6px;
+    background: var(--gray-200);
+    border-radius: 3px;
+    overflow: hidden;
+    width: 80px;
+  }
+  .aging-fill { height: 100%; border-radius: 3px; transition: width .3s; }
+
+  /* Empty State */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray-500);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; margin-bottom: 16px; }
+
+  /* Toast */
+  .toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 300;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .toast {
+    padding: 12px 20px;
+    background: var(--gray-800);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    box-shadow: var(--shadow-md);
+    animation: toastIn .3s ease;
+    max-width: 360px;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* Search */
+  .search-box {
+    position: relative;
+  }
+  .search-box input {
+    padding-left: 32px;
+    min-width: 220px;
+  }
+  .search-box::before {
+    content: '\u{1F50D}';
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 13px;
+    opacity: .5;
+  }
+
+  /* Detail panel */
+  .detail-section { margin-bottom: 20px; }
+  .detail-section h3 {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    color: var(--gray-500);
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
+  }
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+  }
+  .detail-item label {
+    display: block;
+    font-size: 11px;
+    color: var(--gray-500);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .detail-item span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  /* Print */
+  @media print {
+    .header, .tabs, .btn, .modal-overlay, .toast-container { display: none !important; }
+    .main { padding: 0; }
+    .card { box-shadow: none; border: 1px solid #ddd; }
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .detail-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .header h1 { font-size: 16px; }
+    .filters { flex-direction: column; align-items: stretch; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div>
+    <h1>SMA / NPA Follow-Up Tool</h1>
+    <div class="header-sub">Special Mention & Non-Performing Account Management</div>
+  </div>
+  <div class="header-actions">
+    <button class="btn btn-white" onclick="exportData()">Export CSV</button>
+    <button class="btn btn-white" onclick="importDataPrompt()">Import</button>
+    <button class="btn btn-white" onclick="openAccountModal()">+ Add Account</button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <div class="tab active" data-tab="dashboard" onclick="switchTab('dashboard')">Dashboard</div>
+  <div class="tab" data-tab="accounts" onclick="switchTab('accounts')">Accounts</div>
+  <div class="tab" data-tab="followups" onclick="switchTab('followups')">Follow-Ups</div>
+  <div class="tab" data-tab="reports" onclick="switchTab('reports')">Reports</div>
+</div>
+
+<div class="main">
+
+  <!-- ==================== DASHBOARD TAB ==================== -->
+  <div id="tab-dashboard" class="tab-content">
+    <div class="stats-grid" id="statsGrid"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Accounts Requiring Immediate Attention</h2>
+        <span style="font-size:12px;color:var(--gray-500)">Sorted by DPD (highest first)</span>
+      </div>
+      <div class="card-body table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Account No</th>
+              <th>Borrower</th>
+              <th>Category</th>
+              <th>DPD</th>
+              <th>O/S Amount</th>
+              <th>Last Follow-Up</th>
+              <th>Next Action</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="urgentTableBody"></tbody>
+        </table>
+        <div id="urgentEmpty" class="empty-state" style="display:none;">
+          <div class="icon">&#9989;</div>
+          <p>No urgent accounts. All accounts are being managed.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2>Upcoming Follow-Ups (Next 7 Days)</h2>
+      </div>
+      <div class="card-body table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Account No</th>
+              <th>Borrower</th>
+              <th>Action Type</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="upcomingTableBody"></tbody>
+        </table>
+        <div id="upcomingEmpty" class="empty-state" style="display:none;">
+          <p>No upcoming follow-ups scheduled in the next 7 days.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== ACCOUNTS TAB ==================== -->
+  <div id="tab-accounts" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <h2>All Accounts</h2>
+        <button class="btn btn-primary btn-sm" onclick="openAccountModal()">+ Add Account</button>
+      </div>
+      <div class="card-body">
+        <div class="filters">
+          <div class="filter-group">
+            <label>Search</label>
+            <div class="search-box">
+              <input type="text" id="searchInput" placeholder="Name, Account No, Branch..." oninput="renderAccounts()">
+            </div>
+          </div>
+          <div class="filter-group">
+            <label>Category</label>
+            <select id="filterCategory" onchange="renderAccounts()">
+              <option value="">All</option>
+              <option value="SMA-0">SMA-0</option>
+              <option value="SMA-1">SMA-1</option>
+              <option value="SMA-2">SMA-2</option>
+              <option value="NPA-Substandard">NPA - Substandard</option>
+              <option value="NPA-Doubtful">NPA - Doubtful</option>
+              <option value="NPA-Loss">NPA - Loss</option>
+              <option value="Resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Priority</label>
+            <select id="filterPriority" onchange="renderAccounts()">
+              <option value="">All</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Branch</label>
+            <select id="filterBranch" onchange="renderAccounts()">
+              <option value="">All Branches</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Loan Type</label>
+            <select id="filterLoanType" onchange="renderAccounts()">
+              <option value="">All Types</option>
+              <option value="Home Loan">Home Loan</option>
+              <option value="Vehicle Loan">Vehicle Loan</option>
+              <option value="Personal Loan">Personal Loan</option>
+              <option value="Business Loan">Business Loan</option>
+              <option value="Education Loan">Education Loan</option>
+              <option value="Gold Loan">Gold Loan</option>
+              <option value="Agriculture Loan">Agriculture Loan</option>
+              <option value="MSME Loan">MSME Loan</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th onclick="sortAccounts('accountNo')">Account No</th>
+                <th onclick="sortAccounts('borrowerName')">Borrower</th>
+                <th onclick="sortAccounts('loanType')">Loan Type</th>
+                <th onclick="sortAccounts('category')">Category</th>
+                <th onclick="sortAccounts('dpd')">DPD</th>
+                <th onclick="sortAccounts('outstandingAmount')">O/S Amount</th>
+                <th onclick="sortAccounts('overdueAmount')">Overdue</th>
+                <th onclick="sortAccounts('priority')">Priority</th>
+                <th onclick="sortAccounts('branch')">Branch</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="accountsTableBody"></tbody>
+          </table>
+          <div id="accountsEmpty" class="empty-state" style="display:none;">
+            <div class="icon">&#128203;</div>
+            <p>No accounts found. Add your first account to get started.</p>
+            <button class="btn btn-primary" onclick="openAccountModal()">+ Add Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== FOLLOW-UPS TAB ==================== -->
+  <div id="tab-followups" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-header">
+        <h2>Follow-Up History</h2>
+        <div style="display:flex;gap:8px;">
+          <select id="followupAccountFilter" onchange="renderFollowUps()" style="width:auto;">
+            <option value="">All Accounts</option>
+          </select>
+          <select id="followupTypeFilter" onchange="renderFollowUps()" style="width:auto;">
+            <option value="">All Types</option>
+            <option value="Phone Call">Phone Call</option>
+            <option value="Personal Visit">Personal Visit</option>
+            <option value="Notice Sent">Notice Sent</option>
+            <option value="Email">Email</option>
+            <option value="Legal Action">Legal Action</option>
+            <option value="Restructure Discussion">Restructure Discussion</option>
+            <option value="Recovery">Recovery</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="timeline" id="followupTimeline"></div>
+        <div id="followupsEmpty" class="empty-state" style="display:none;">
+          <div class="icon">&#128221;</div>
+          <p>No follow-ups recorded yet. Open an account to add follow-up actions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== REPORTS TAB ==================== -->
+  <div id="tab-reports" class="tab-content" style="display:none;">
+    <div class="card">
+      <div class="card-header"><h2>Category-wise Summary</h2></div>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>No. of Accounts</th>
+              <th>Total Outstanding</th>
+              <th>Total Overdue</th>
+              <th>Avg DPD</th>
+            </tr>
+          </thead>
+          <tbody id="reportCategoryBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Branch-wise Summary</h2></div>
+      <div class="card-body">
+        <table>
+          <thead>
+            <tr>
+              <th>Branch</th>
+              <th>No. of Accounts</th>
+              <th>SMA-0</th>
+              <th>SMA-1</th>
+              <th>SMA-2</th>
+              <th>NPA</th>
+              <th>Total Outstanding</th>
+            </tr>
+          </thead>
+          <tbody id="reportBranchBody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>Follow-Up Activity Report</h2></div>
+      <div class="card-body">
+        <div class="filters" style="margin-bottom:14px;">
+          <div class="filter-group">
+            <label>From</label>
+            <input type="date" id="reportDateFrom">
+          </div>
+          <div class="filter-group">
+            <label>To</label>
+            <input type="date" id="reportDateTo">
+          </div>
+          <div class="filter-group" style="justify-content:flex-end;">
+            <label>&nbsp;</label>
+            <button class="btn btn-primary btn-sm" onclick="renderActivityReport()">Generate</button>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Action Type</th>
+              <th>Count</th>
+              <th>Accounts Covered</th>
+            </tr>
+          </thead>
+          <tbody id="reportActivityBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Hidden file input for import -->
+<input type="file" id="importFileInput" accept=".json,.csv" style="display:none" onchange="handleImport(event)">
+
+<!-- ==================== ACCOUNT MODAL ==================== -->
+<div class="modal-overlay" id="accountModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="accountModalTitle">Add New Account</h2>
+      <button class="modal-close" onclick="closeModal('accountModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editAccountId">
+      <div class="form-grid">
+        <div class="form-group">
+          <label><span class="required">Account Number</span></label>
+          <input type="text" id="fAccountNo" placeholder="e.g., 1234567890">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Borrower Name</span></label>
+          <input type="text" id="fBorrowerName" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Contact Number</label>
+          <input type="tel" id="fContactNo" placeholder="Mobile number">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="fEmail" placeholder="Email address">
+        </div>
+        <div class="form-group full">
+          <label>Address</label>
+          <input type="text" id="fAddress" placeholder="Full address">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Loan Type</span></label>
+          <select id="fLoanType">
+            <option value="">Select...</option>
+            <option>Home Loan</option>
+            <option>Vehicle Loan</option>
+            <option>Personal Loan</option>
+            <option>Business Loan</option>
+            <option>Education Loan</option>
+            <option>Gold Loan</option>
+            <option>Agriculture Loan</option>
+            <option>MSME Loan</option>
+            <option>Credit Card</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Sanction Amount</label>
+          <input type="number" id="fSanctionAmount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Outstanding Amount</span></label>
+          <input type="number" id="fOutstandingAmount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Overdue Amount</span></label>
+          <input type="number" id="fOverdueAmount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>EMI Amount</label>
+          <input type="number" id="fEmiAmount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label><span class="required">DPD (Days Past Due)</span></label>
+          <input type="number" id="fDpd" placeholder="0" min="0">
+        </div>
+        <div class="form-group">
+          <label><span class="required">Category</span></label>
+          <select id="fCategory">
+            <option value="">Select...</option>
+            <option value="SMA-0">SMA-0 (1-30 DPD)</option>
+            <option value="SMA-1">SMA-1 (31-60 DPD)</option>
+            <option value="SMA-2">SMA-2 (61-90 DPD)</option>
+            <option value="NPA-Substandard">NPA - Substandard</option>
+            <option value="NPA-Doubtful">NPA - Doubtful</option>
+            <option value="NPA-Loss">NPA - Loss</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>NPA Date</label>
+          <input type="date" id="fNpaDate">
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select id="fPriority">
+            <option value="Auto">Auto (based on DPD)</option>
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><span class="required">Branch</span></label>
+          <input type="text" id="fBranch" placeholder="Branch name">
+        </div>
+        <div class="form-group">
+          <label>Relationship Manager</label>
+          <input type="text" id="fRM" placeholder="RM name">
+        </div>
+        <div class="form-group">
+          <label>Security / Collateral</label>
+          <input type="text" id="fSecurity" placeholder="Property, vehicle, etc.">
+        </div>
+        <div class="form-group">
+          <label>Guarantor Name</label>
+          <input type="text" id="fGuarantor" placeholder="Guarantor name">
+        </div>
+        <div class="form-group full">
+          <label>Remarks</label>
+          <textarea id="fRemarks" placeholder="Any additional notes..."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('accountModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveAccount()">Save Account</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== ACCOUNT DETAIL MODAL ==================== -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="max-width:860px;">
+    <div class="modal-header">
+      <h2 id="detailModalTitle">Account Details</h2>
+      <button class="modal-close" onclick="closeModal('detailModal')">&times;</button>
+    </div>
+    <div class="modal-body" id="detailModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('detailModal')">Close</button>
+      <button class="btn btn-success" id="detailResolveBtn" onclick="resolveAccount()">Mark as Resolved</button>
+      <button class="btn btn-warning" id="detailEditBtn" onclick="editFromDetail()">Edit Account</button>
+      <button class="btn btn-primary" id="detailFollowUpBtn" onclick="openFollowUpFromDetail()">+ Add Follow-Up</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== FOLLOW-UP MODAL ==================== -->
+<div class="modal-overlay" id="followUpModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-header">
+      <h2>Add Follow-Up Action</h2>
+      <button class="modal-close" onclick="closeModal('followUpModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="fuAccountId">
+      <div class="form-grid">
+        <div class="form-group">
+          <label><span class="required">Action Type</span></label>
+          <select id="fuActionType">
+            <option value="">Select...</option>
+            <option>Phone Call</option>
+            <option>Personal Visit</option>
+            <option>Notice Sent</option>
+            <option>Email</option>
+            <option>Legal Action</option>
+            <option>Restructure Discussion</option>
+            <option>Recovery</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label><span class="required">Date</span></label>
+          <input type="date" id="fuDate">
+        </div>
+        <div class="form-group">
+          <label>Contacted Person</label>
+          <input type="text" id="fuContactedPerson" placeholder="Name of person contacted">
+        </div>
+        <div class="form-group">
+          <label>Follow-Up By</label>
+          <input type="text" id="fuFollowUpBy" placeholder="Officer / RM name">
+        </div>
+        <div class="form-group full">
+          <label><span class="required">Notes / Action Taken</span></label>
+          <textarea id="fuNotes" placeholder="Describe the action taken and outcome..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Borrower Response</label>
+          <textarea id="fuResponse" placeholder="What was the borrower's response / promise?"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Promise to Pay Date</label>
+          <input type="date" id="fuPromiseDate">
+        </div>
+        <div class="form-group">
+          <label>Amount Promised / Recovered</label>
+          <input type="number" id="fuAmountPromised" placeholder="0.00" step="0.01">
+        </div>
+        <div class="form-group">
+          <label>Next Follow-Up Date</label>
+          <input type="date" id="fuNextDate">
+        </div>
+        <div class="form-group">
+          <label>Next Action Planned</label>
+          <select id="fuNextAction">
+            <option value="">Select...</option>
+            <option>Phone Call</option>
+            <option>Personal Visit</option>
+            <option>Send Notice</option>
+            <option>Legal Action</option>
+            <option>Email Reminder</option>
+            <option>Restructure Meeting</option>
+            <option>Escalation</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('followUpModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveFollowUp()">Save Follow-Up</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== CONFIRM MODAL ==================== -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header">
+      <h2 id="confirmTitle">Confirm</h2>
+      <button class="modal-close" onclick="closeModal('confirmModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p id="confirmMessage"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== DATA STORE ====================
+const STORAGE_KEY = 'sma_npa_tool_data';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) { console.error('Error loading data', e); }
+  return { accounts: [], followUps: [] };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let appData = loadData();
+let currentDetailAccountId = null;
+let sortField = 'dpd';
+let sortDir = -1; // -1 = desc
+
+// ==================== UTILITY ====================
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+}
+
+function formatCurrency(num) {
+  if (num == null || isNaN(num)) return '-';
+  return new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).format(num);
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '-';
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function daysFromNow(dateStr) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  d.setHours(0,0,0,0);
+  return Math.round((d - now) / 86400000);
+}
+
+function getCategoryBadgeClass(cat) {
+  if (!cat) return '';
+  if (cat === 'SMA-0') return 'badge-sma0';
+  if (cat === 'SMA-1') return 'badge-sma1';
+  if (cat === 'SMA-2') return 'badge-sma2';
+  if (cat === 'NPA-Substandard') return 'badge-substandard';
+  if (cat === 'NPA-Doubtful') return 'badge-doubtful';
+  if (cat === 'NPA-Loss') return 'badge-loss';
+  if (cat === 'Resolved') return 'badge-resolved';
+  return '';
+}
+
+function getCategoryLabel(cat) {
+  if (cat === 'NPA-Substandard') return 'NPA-Sub';
+  if (cat === 'NPA-Doubtful') return 'NPA-Dbt';
+  if (cat === 'NPA-Loss') return 'NPA-Loss';
+  return cat || '-';
+}
+
+function isNPA(cat) {
+  return cat && cat.startsWith('NPA-');
+}
+
+function computePriority(acc) {
+  if (acc.priority && acc.priority !== 'Auto') return acc.priority;
+  if (acc.dpd >= 90 || isNPA(acc.category)) return 'High';
+  if (acc.dpd >= 30) return 'Medium';
+  return 'Low';
+}
+
+function suggestCategory(dpd) {
+  if (dpd <= 30) return 'SMA-0';
+  if (dpd <= 60) return 'SMA-1';
+  if (dpd <= 90) return 'SMA-2';
+  return 'NPA-Substandard';
+}
+
+function getDpdClass(dpd) {
+  if (dpd >= 90) return 'dpd-critical';
+  if (dpd >= 30) return 'dpd-warn';
+  return 'dpd-ok';
+}
+
+function getLastFollowUp(accountId) {
+  const fups = appData.followUps.filter(f => f.accountId === accountId);
+  if (fups.length === 0) return null;
+  fups.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return fups[0];
+}
+
+function getNextFollowUp(accountId) {
+  const fups = appData.followUps.filter(f => f.accountId === accountId && f.nextDate);
+  if (fups.length === 0) return null;
+  fups.sort((a,b) => new Date(b.date) - new Date(a.date));
+  return fups[0];
+}
+
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + (type || '');
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 300); }, 3000);
+}
+
+// ==================== TAB SWITCHING ====================
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tabName).style.display = 'block';
+  document.querySelector(`.tab[data-tab="${tabName}"]`).classList.add('active');
+
+  if (tabName === 'dashboard') renderDashboard();
+  else if (tabName === 'accounts') renderAccounts();
+  else if (tabName === 'followups') renderFollowUps();
+  else if (tabName === 'reports') renderReports();
+}
+
+// ==================== MODAL ====================
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ==================== DASHBOARD ====================
+function renderDashboard() {
+  renderStats();
+  renderUrgentTable();
+  renderUpcomingTable();
+}
+
+function renderStats() {
+  const accounts = appData.accounts;
+  const active = accounts.filter(a => a.category !== 'Resolved');
+  const cats = {
+    'SMA-0': active.filter(a => a.category === 'SMA-0'),
+    'SMA-1': active.filter(a => a.category === 'SMA-1'),
+    'SMA-2': active.filter(a => a.category === 'SMA-2'),
+    'NPA': active.filter(a => isNPA(a.category)),
+    'Total Active': active,
+    'Resolved': accounts.filter(a => a.category === 'Resolved')
+  };
+
+  const sumOutstanding = arr => arr.reduce((s,a) => s + (parseFloat(a.outstandingAmount)||0), 0);
+
+  const statsHtml = Object.entries(cats).map(([label, arr]) => {
+    const cls = label === 'SMA-0' ? 'sma0' : label === 'SMA-1' ? 'sma1' : label === 'SMA-2' ? 'sma2' :
+                label === 'NPA' ? 'npa' : label === 'Resolved' ? 'resolved' : 'total';
+    const filterVal = label === 'NPA' ? 'NPA' : label === 'Total Active' ? '' : label;
+    return `<div class="stat-card ${cls}" onclick="filterByCategory('${filterVal}')">
+      <div class="stat-label">${label}</div>
+      <div class="stat-value">${arr.length}</div>
+      <div class="stat-amount">${formatCurrency(sumOutstanding(arr))}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('statsGrid').innerHTML = statsHtml;
+}
+
+function filterByCategory(cat) {
+  switchTab('accounts');
+  const sel = document.getElementById('filterCategory');
+  if (cat === 'NPA') {
+    sel.value = 'NPA-Substandard'; // will show all NPA via special logic
+    // Actually let's just handle NPA in filter - set to empty and use search
+    sel.value = '';
+    document.getElementById('searchInput').value = 'NPA';
+  } else {
+    document.getElementById('searchInput').value = '';
+    sel.value = cat;
+  }
+  renderAccounts();
+}
+
+function renderUrgentTable() {
+  const active = appData.accounts.filter(a => a.category !== 'Resolved' && a.dpd >= 30);
+  active.sort((a,b) => b.dpd - a.dpd);
+  const top = active.slice(0, 15);
+
+  const tbody = document.getElementById('urgentTableBody');
+  const empty = document.getElementById('urgentEmpty');
+
+  if (top.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = top.map(acc => {
+    const lastFu = getLastFollowUp(acc.id);
+    const nextFu = getNextFollowUp(acc.id);
+    const priority = computePriority(acc);
+    return `<tr>
+      <td><a href="#" onclick="viewAccount('${acc.id}');return false;">${acc.accountNo}</a></td>
+      <td>${acc.borrowerName}</td>
+      <td><span class="badge ${getCategoryBadgeClass(acc.category)}">${getCategoryLabel(acc.category)}</span></td>
+      <td><span class="dpd ${getDpdClass(acc.dpd)}">${acc.dpd}</span></td>
+      <td>${formatCurrency(acc.outstandingAmount)}</td>
+      <td>${lastFu ? formatDate(lastFu.date) + ' - ' + lastFu.actionType : '<em style="color:var(--gray-400)">None</em>'}</td>
+      <td>${nextFu && nextFu.nextDate ? formatDate(nextFu.nextDate) + ' - ' + (nextFu.nextAction||'Follow-up') : '-'}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="openFollowUpModal('${acc.id}')">Follow-Up</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderUpcomingTable() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const weekLater = new Date(today); weekLater.setDate(weekLater.getDate() + 7);
+
+  // Collect next follow-up dates from follow-up records
+  const upcoming = [];
+  appData.accounts.forEach(acc => {
+    if (acc.category === 'Resolved') return;
+    const fups = appData.followUps.filter(f => f.accountId === acc.id && f.nextDate);
+    fups.forEach(fu => {
+      const nd = new Date(fu.nextDate);
+      if (nd >= today && nd <= weekLater) {
+        upcoming.push({ account: acc, followUp: fu, nextDate: nd });
+      }
+    });
+  });
+
+  upcoming.sort((a,b) => a.nextDate - b.nextDate);
+
+  const tbody = document.getElementById('upcomingTableBody');
+  const empty = document.getElementById('upcomingEmpty');
+
+  if (upcoming.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = upcoming.map(item => {
+    const diff = daysFromNow(item.followUp.nextDate);
+    const dateColor = diff <= 0 ? 'var(--danger)' : diff <= 2 ? 'var(--warning)' : 'inherit';
+    return `<tr>
+      <td style="color:${dateColor};font-weight:600;">${formatDate(item.followUp.nextDate)}${diff <= 0 ? ' (TODAY/OVERDUE)' : diff === 1 ? ' (Tomorrow)' : ''}</td>
+      <td><a href="#" onclick="viewAccount('${item.account.id}');return false;">${item.account.accountNo}</a></td>
+      <td>${item.account.borrowerName}</td>
+      <td>${item.followUp.nextAction || 'Follow-up'}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${item.followUp.notes || '-'}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="openFollowUpModal('${item.account.id}')">Follow-Up</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ==================== ACCOUNTS ====================
+function renderAccounts() {
+  const search = (document.getElementById('searchInput').value || '').toLowerCase();
+  const catFilter = document.getElementById('filterCategory').value;
+  const prioFilter = document.getElementById('filterPriority').value;
+  const branchFilter = document.getElementById('filterBranch').value;
+  const loanFilter = document.getElementById('filterLoanType').value;
+
+  let filtered = appData.accounts.filter(acc => {
+    if (catFilter && acc.category !== catFilter) return false;
+    if (prioFilter && computePriority(acc) !== prioFilter) return false;
+    if (branchFilter && acc.branch !== branchFilter) return false;
+    if (loanFilter && acc.loanType !== loanFilter) return false;
+    if (search) {
+      const haystack = [acc.accountNo, acc.borrowerName, acc.branch, acc.loanType, acc.category, acc.contactNo, acc.remarks]
+        .filter(Boolean).join(' ').toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // Sort
+  filtered.sort((a, b) => {
+    let av = a[sortField], bv = b[sortField];
+    if (sortField === 'priority') {
+      const order = { High: 3, Medium: 2, Low: 1 };
+      av = order[computePriority(a)] || 0;
+      bv = order[computePriority(b)] || 0;
+    }
+    if (typeof av === 'string') av = av.toLowerCase();
+    if (typeof bv === 'string') bv = bv.toLowerCase();
+    if (av < bv) return -1 * sortDir;
+    if (av > bv) return 1 * sortDir;
+    return 0;
+  });
+
+  const tbody = document.getElementById('accountsTableBody');
+  const empty = document.getElementById('accountsEmpty');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  tbody.innerHTML = filtered.map(acc => {
+    const priority = computePriority(acc);
+    return `<tr>
+      <td><a href="#" onclick="viewAccount('${acc.id}');return false;">${acc.accountNo}</a></td>
+      <td>${acc.borrowerName}</td>
+      <td>${acc.loanType || '-'}</td>
+      <td><span class="badge ${getCategoryBadgeClass(acc.category)}">${getCategoryLabel(acc.category)}</span></td>
+      <td><span class="dpd ${getDpdClass(acc.dpd)}">${acc.dpd}</span></td>
+      <td>${formatCurrency(acc.outstandingAmount)}</td>
+      <td>${formatCurrency(acc.overdueAmount)}</td>
+      <td><span class="priority-${priority.toLowerCase()}">${priority}</span></td>
+      <td>${acc.branch || '-'}</td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-primary btn-sm" onclick="openFollowUpModal('${acc.id}')" title="Add Follow-Up">+FU</button>
+        <button class="btn btn-outline btn-sm" onclick="editAccount('${acc.id}')" title="Edit">Edit</button>
+        <button class="btn btn-outline btn-sm" onclick="confirmDeleteAccount('${acc.id}')" title="Delete" style="color:var(--danger);">Del</button>
+      </td>
+    </tr>`;
+  }).join('');
+
+  // Update branch filter options
+  updateBranchFilter();
+}
+
+function sortAccounts(field) {
+  if (sortField === field) {
+    sortDir *= -1;
+  } else {
+    sortField = field;
+    sortDir = field === 'dpd' || field === 'outstandingAmount' || field === 'overdueAmount' ? -1 : 1;
+  }
+  renderAccounts();
+}
+
+function updateBranchFilter() {
+  const branches = [...new Set(appData.accounts.map(a => a.branch).filter(Boolean))].sort();
+  const sel = document.getElementById('filterBranch');
+  const current = sel.value;
+  sel.innerHTML = '<option value="">All Branches</option>' +
+    branches.map(b => `<option value="${b}" ${b === current ? 'selected' : ''}>${b}</option>`).join('');
+}
+
+// ==================== ACCOUNT CRUD ====================
+function openAccountModal(id) {
+  document.getElementById('editAccountId').value = '';
+  document.getElementById('accountModalTitle').textContent = 'Add New Account';
+  // Clear fields
+  ['fAccountNo','fBorrowerName','fContactNo','fEmail','fAddress','fLoanType',
+   'fSanctionAmount','fOutstandingAmount','fOverdueAmount','fEmiAmount',
+   'fDpd','fCategory','fNpaDate','fPriority','fBranch','fRM','fSecurity','fGuarantor','fRemarks']
+  .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('fPriority').value = 'Auto';
+  openModal('accountModal');
+}
+
+function editAccount(id) {
+  const acc = appData.accounts.find(a => a.id === id);
+  if (!acc) return;
+  document.getElementById('editAccountId').value = id;
+  document.getElementById('accountModalTitle').textContent = 'Edit Account';
+  document.getElementById('fAccountNo').value = acc.accountNo || '';
+  document.getElementById('fBorrowerName').value = acc.borrowerName || '';
+  document.getElementById('fContactNo').value = acc.contactNo || '';
+  document.getElementById('fEmail').value = acc.email || '';
+  document.getElementById('fAddress').value = acc.address || '';
+  document.getElementById('fLoanType').value = acc.loanType || '';
+  document.getElementById('fSanctionAmount').value = acc.sanctionAmount || '';
+  document.getElementById('fOutstandingAmount').value = acc.outstandingAmount || '';
+  document.getElementById('fOverdueAmount').value = acc.overdueAmount || '';
+  document.getElementById('fEmiAmount').value = acc.emiAmount || '';
+  document.getElementById('fDpd').value = acc.dpd || 0;
+  document.getElementById('fCategory').value = acc.category || '';
+  document.getElementById('fNpaDate').value = acc.npaDate || '';
+  document.getElementById('fPriority').value = acc.priority || 'Auto';
+  document.getElementById('fBranch').value = acc.branch || '';
+  document.getElementById('fRM').value = acc.rm || '';
+  document.getElementById('fSecurity').value = acc.security || '';
+  document.getElementById('fGuarantor').value = acc.guarantor || '';
+  document.getElementById('fRemarks').value = acc.remarks || '';
+  openModal('accountModal');
+}
+
+function saveAccount() {
+  const accountNo = document.getElementById('fAccountNo').value.trim();
+  const borrowerName = document.getElementById('fBorrowerName').value.trim();
+  const loanType = document.getElementById('fLoanType').value;
+  const outstandingAmount = parseFloat(document.getElementById('fOutstandingAmount').value) || 0;
+  const overdueAmount = parseFloat(document.getElementById('fOverdueAmount').value) || 0;
+  const dpd = parseInt(document.getElementById('fDpd').value) || 0;
+  const category = document.getElementById('fCategory').value;
+  const branch = document.getElementById('fBranch').value.trim();
+
+  // Validation
+  if (!accountNo || !borrowerName || !loanType || !category || !branch) {
+    showToast('Please fill in all required fields (marked with *)', 'error');
+    return;
+  }
+
+  const editId = document.getElementById('editAccountId').value;
+  const isEdit = !!editId;
+
+  // Check duplicate account number
+  if (!isEdit && appData.accounts.some(a => a.accountNo === accountNo)) {
+    showToast('Account number already exists!', 'error');
+    return;
+  }
+  if (isEdit && appData.accounts.some(a => a.accountNo === accountNo && a.id !== editId)) {
+    showToast('Account number already exists!', 'error');
+    return;
+  }
+
+  const accObj = {
+    id: isEdit ? editId : generateId(),
+    accountNo,
+    borrowerName,
+    contactNo: document.getElementById('fContactNo').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    address: document.getElementById('fAddress').value.trim(),
+    loanType,
+    sanctionAmount: parseFloat(document.getElementById('fSanctionAmount').value) || 0,
+    outstandingAmount,
+    overdueAmount,
+    emiAmount: parseFloat(document.getElementById('fEmiAmount').value) || 0,
+    dpd,
+    category,
+    npaDate: document.getElementById('fNpaDate').value || '',
+    priority: document.getElementById('fPriority').value,
+    branch,
+    rm: document.getElementById('fRM').value.trim(),
+    security: document.getElementById('fSecurity').value.trim(),
+    guarantor: document.getElementById('fGuarantor').value.trim(),
+    remarks: document.getElementById('fRemarks').value.trim(),
+    createdAt: isEdit ? (appData.accounts.find(a=>a.id===editId).createdAt || new Date().toISOString()) : new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  if (isEdit) {
+    const idx = appData.accounts.findIndex(a => a.id === editId);
+    if (idx !== -1) appData.accounts[idx] = accObj;
+  } else {
+    appData.accounts.push(accObj);
+  }
+
+  saveData(appData);
+  closeModal('accountModal');
+  showToast(isEdit ? 'Account updated successfully' : 'Account added successfully', 'success');
+  renderCurrentTab();
+}
+
+function confirmDeleteAccount(id) {
+  const acc = appData.accounts.find(a => a.id === id);
+  if (!acc) return;
+  document.getElementById('confirmTitle').textContent = 'Delete Account';
+  document.getElementById('confirmMessage').textContent = `Are you sure you want to delete account ${acc.accountNo} (${acc.borrowerName})? This will also delete all follow-up records for this account.`;
+  document.getElementById('confirmOkBtn').onclick = () => {
+    appData.accounts = appData.accounts.filter(a => a.id !== id);
+    appData.followUps = appData.followUps.filter(f => f.accountId !== id);
+    saveData(appData);
+    closeModal('confirmModal');
+    showToast('Account deleted', 'success');
+    renderCurrentTab();
+  };
+  openModal('confirmModal');
+}
+
+function resolveAccount() {
+  if (!currentDetailAccountId) return;
+  const acc = appData.accounts.find(a => a.id === currentDetailAccountId);
+  if (!acc) return;
+  acc.category = 'Resolved';
+  acc.updatedAt = new Date().toISOString();
+  saveData(appData);
+  closeModal('detailModal');
+  showToast(`Account ${acc.accountNo} marked as Resolved`, 'success');
+  renderCurrentTab();
+}
+
+// ==================== ACCOUNT DETAIL VIEW ====================
+function viewAccount(id) {
+  const acc = appData.accounts.find(a => a.id === id);
+  if (!acc) return;
+  currentDetailAccountId = id;
+
+  document.getElementById('detailModalTitle').textContent = `${acc.borrowerName} - ${acc.accountNo}`;
+
+  const fups = appData.followUps.filter(f => f.accountId === id);
+  fups.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const priority = computePriority(acc);
+  const isResolved = acc.category === 'Resolved';
+
+  document.getElementById('detailResolveBtn').style.display = isResolved ? 'none' : '';
+
+  let html = `
+    <div class="detail-section">
+      <h3>Account Information</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Account No</label><span>${acc.accountNo}</span></div>
+        <div class="detail-item"><label>Borrower</label><span>${acc.borrowerName}</span></div>
+        <div class="detail-item"><label>Contact</label><span>${acc.contactNo || '-'}</span></div>
+        <div class="detail-item"><label>Email</label><span>${acc.email || '-'}</span></div>
+        <div class="detail-item"><label>Address</label><span>${acc.address || '-'}</span></div>
+        <div class="detail-item"><label>Branch</label><span>${acc.branch || '-'}</span></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Loan Details</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Loan Type</label><span>${acc.loanType || '-'}</span></div>
+        <div class="detail-item"><label>Sanction Amount</label><span>${formatCurrency(acc.sanctionAmount)}</span></div>
+        <div class="detail-item"><label>Outstanding</label><span style="font-weight:700;">${formatCurrency(acc.outstandingAmount)}</span></div>
+        <div class="detail-item"><label>Overdue</label><span style="font-weight:700;color:var(--danger);">${formatCurrency(acc.overdueAmount)}</span></div>
+        <div class="detail-item"><label>EMI Amount</label><span>${formatCurrency(acc.emiAmount)}</span></div>
+        <div class="detail-item"><label>Security</label><span>${acc.security || '-'}</span></div>
+      </div>
+    </div>
+    <div class="detail-section">
+      <h3>Classification</h3>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Category</label><span><span class="badge ${getCategoryBadgeClass(acc.category)}">${acc.category}</span></span></div>
+        <div class="detail-item"><label>DPD</label><span class="dpd ${getDpdClass(acc.dpd)}">${acc.dpd} days</span></div>
+        <div class="detail-item"><label>Priority</label><span class="priority-${priority.toLowerCase()}">${priority}</span></div>
+        <div class="detail-item"><label>NPA Date</label><span>${acc.npaDate ? formatDate(acc.npaDate) : '-'}</span></div>
+        <div class="detail-item"><label>RM</label><span>${acc.rm || '-'}</span></div>
+        <div class="detail-item"><label>Guarantor</label><span>${acc.guarantor || '-'}</span></div>
+      </div>
+      ${acc.remarks ? `<div style="margin-top:10px;padding:10px;background:var(--gray-100);border-radius:6px;font-size:13px;"><strong>Remarks:</strong> ${acc.remarks}</div>` : ''}
+    </div>
+    <div class="detail-section">
+      <h3>Follow-Up History (${fups.length})</h3>
+      ${fups.length === 0 ? '<p style="color:var(--gray-400);font-size:13px;">No follow-ups recorded yet.</p>' :
+        '<div class="timeline">' + fups.map(fu => {
+          const dotClass = fu.actionType === 'Phone Call' ? 'call' :
+                           fu.actionType === 'Personal Visit' ? 'visit' :
+                           fu.actionType === 'Notice Sent' ? 'notice' :
+                           fu.actionType === 'Legal Action' ? 'legal' :
+                           fu.actionType === 'Email' ? 'email' :
+                           fu.actionType === 'Restructure Discussion' ? 'restructure' : '';
+          return `<div class="timeline-item">
+            <div class="timeline-dot ${dotClass}"></div>
+            <div class="timeline-content">
+              <div class="timeline-meta">
+                <strong>${fu.actionType}</strong>
+                <span>${formatDate(fu.date)}</span>
+                ${fu.followUpBy ? `<span>By: ${fu.followUpBy}</span>` : ''}
+                ${fu.contactedPerson ? `<span>Contact: ${fu.contactedPerson}</span>` : ''}
+              </div>
+              <div class="timeline-text">${fu.notes || ''}</div>
+              ${fu.response ? `<div class="timeline-response"><strong>Response:</strong> ${fu.response}</div>` : ''}
+              <div class="timeline-meta" style="margin-top:6px;">
+                ${fu.promiseDate ? `<span>Promise Date: ${formatDate(fu.promiseDate)}</span>` : ''}
+                ${fu.amountPromised ? `<span>Amount: ${formatCurrency(fu.amountPromised)}</span>` : ''}
+                ${fu.nextDate ? `<span>Next F/U: ${formatDate(fu.nextDate)} - ${fu.nextAction || 'Follow-up'}</span>` : ''}
+              </div>
+            </div>
+          </div>`;
+        }).join('') + '</div>'
+      }
+    </div>
+  `;
+
+  document.getElementById('detailModalBody').innerHTML = html;
+  openModal('detailModal');
+}
+
+function editFromDetail() {
+  closeModal('detailModal');
+  editAccount(currentDetailAccountId);
+}
+
+function openFollowUpFromDetail() {
+  closeModal('detailModal');
+  openFollowUpModal(currentDetailAccountId);
+}
+
+// ==================== FOLLOW-UP CRUD ====================
+function openFollowUpModal(accountId) {
+  document.getElementById('fuAccountId').value = accountId;
+  document.getElementById('fuDate').value = new Date().toISOString().split('T')[0];
+  document.getElementById('fuActionType').value = '';
+  document.getElementById('fuContactedPerson').value = '';
+  document.getElementById('fuFollowUpBy').value = '';
+  document.getElementById('fuNotes').value = '';
+  document.getElementById('fuResponse').value = '';
+  document.getElementById('fuPromiseDate').value = '';
+  document.getElementById('fuAmountPromised').value = '';
+  document.getElementById('fuNextDate').value = '';
+  document.getElementById('fuNextAction').value = '';
+  openModal('followUpModal');
+}
+
+function saveFollowUp() {
+  const accountId = document.getElementById('fuAccountId').value;
+  const actionType = document.getElementById('fuActionType').value;
+  const date = document.getElementById('fuDate').value;
+  const notes = document.getElementById('fuNotes').value.trim();
+
+  if (!actionType || !date || !notes) {
+    showToast('Please fill in Action Type, Date, and Notes', 'error');
+    return;
+  }
+
+  const fuObj = {
+    id: generateId(),
+    accountId,
+    actionType,
+    date,
+    contactedPerson: document.getElementById('fuContactedPerson').value.trim(),
+    followUpBy: document.getElementById('fuFollowUpBy').value.trim(),
+    notes,
+    response: document.getElementById('fuResponse').value.trim(),
+    promiseDate: document.getElementById('fuPromiseDate').value || '',
+    amountPromised: parseFloat(document.getElementById('fuAmountPromised').value) || 0,
+    nextDate: document.getElementById('fuNextDate').value || '',
+    nextAction: document.getElementById('fuNextAction').value,
+    createdAt: new Date().toISOString()
+  };
+
+  appData.followUps.push(fuObj);
+  saveData(appData);
+  closeModal('followUpModal');
+  showToast('Follow-up recorded successfully', 'success');
+  renderCurrentTab();
+}
+
+function renderFollowUps() {
+  const accountFilter = document.getElementById('followupAccountFilter').value;
+  const typeFilter = document.getElementById('followupTypeFilter').value;
+
+  // Update account filter options
+  const sel = document.getElementById('followupAccountFilter');
+  const currentVal = sel.value;
+  const opts = '<option value="">All Accounts</option>' +
+    appData.accounts.map(a => `<option value="${a.id}" ${a.id === currentVal ? 'selected' : ''}>${a.accountNo} - ${a.borrowerName}</option>`).join('');
+  sel.innerHTML = opts;
+
+  let fups = [...appData.followUps];
+  if (accountFilter) fups = fups.filter(f => f.accountId === accountFilter);
+  if (typeFilter) fups = fups.filter(f => f.actionType === typeFilter);
+  fups.sort((a,b) => new Date(b.date) - new Date(a.date));
+
+  const container = document.getElementById('followupTimeline');
+  const empty = document.getElementById('followupsEmpty');
+
+  if (fups.length === 0) {
+    container.innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  container.innerHTML = fups.map(fu => {
+    const acc = appData.accounts.find(a => a.id === fu.accountId);
+    const dotClass = fu.actionType === 'Phone Call' ? 'call' :
+                     fu.actionType === 'Personal Visit' ? 'visit' :
+                     fu.actionType === 'Notice Sent' ? 'notice' :
+                     fu.actionType === 'Legal Action' ? 'legal' :
+                     fu.actionType === 'Email' ? 'email' :
+                     fu.actionType === 'Restructure Discussion' ? 'restructure' : '';
+    return `<div class="timeline-item">
+      <div class="timeline-dot ${dotClass}"></div>
+      <div class="timeline-content">
+        <div class="timeline-meta">
+          <strong>${fu.actionType}</strong>
+          <span>${formatDate(fu.date)}</span>
+          ${acc ? `<span><a href="#" onclick="viewAccount('${acc.id}');return false;">${acc.accountNo} - ${acc.borrowerName}</a></span>` : ''}
+          ${fu.followUpBy ? `<span>By: ${fu.followUpBy}</span>` : ''}
+        </div>
+        <div class="timeline-text">${fu.notes || ''}</div>
+        ${fu.response ? `<div class="timeline-response"><strong>Response:</strong> ${fu.response}</div>` : ''}
+        <div class="timeline-meta" style="margin-top:6px;">
+          ${fu.promiseDate ? `<span>Promise Date: ${formatDate(fu.promiseDate)}</span>` : ''}
+          ${fu.amountPromised ? `<span>Amount: ${formatCurrency(fu.amountPromised)}</span>` : ''}
+          ${fu.nextDate ? `<span>Next F/U: ${formatDate(fu.nextDate)} - ${fu.nextAction || ''}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ==================== REPORTS ====================
+function renderReports() {
+  renderCategoryReport();
+  renderBranchReport();
+  // Set default date range for activity report
+  const today = new Date();
+  const monthAgo = new Date(today); monthAgo.setMonth(monthAgo.getMonth() - 1);
+  document.getElementById('reportDateTo').value = today.toISOString().split('T')[0];
+  document.getElementById('reportDateFrom').value = monthAgo.toISOString().split('T')[0];
+  renderActivityReport();
+}
+
+function renderCategoryReport() {
+  const categories = ['SMA-0', 'SMA-1', 'SMA-2', 'NPA-Substandard', 'NPA-Doubtful', 'NPA-Loss', 'Resolved'];
+  const tbody = document.getElementById('reportCategoryBody');
+
+  let totalAccounts = 0, totalOs = 0, totalOverdue = 0;
+
+  const rows = categories.map(cat => {
+    const accs = appData.accounts.filter(a => a.category === cat);
+    const os = accs.reduce((s,a) => s + (parseFloat(a.outstandingAmount)||0), 0);
+    const od = accs.reduce((s,a) => s + (parseFloat(a.overdueAmount)||0), 0);
+    const avgDpd = accs.length > 0 ? Math.round(accs.reduce((s,a) => s + (a.dpd||0), 0) / accs.length) : 0;
+    totalAccounts += accs.length;
+    totalOs += os;
+    totalOverdue += od;
+    return `<tr>
+      <td><span class="badge ${getCategoryBadgeClass(cat)}">${cat}</span></td>
+      <td>${accs.length}</td>
+      <td>${formatCurrency(os)}</td>
+      <td>${formatCurrency(od)}</td>
+      <td>${avgDpd}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.innerHTML = rows + `<tr style="font-weight:700;background:var(--gray-100);">
+    <td>TOTAL</td>
+    <td>${totalAccounts}</td>
+    <td>${formatCurrency(totalOs)}</td>
+    <td>${formatCurrency(totalOverdue)}</td>
+    <td>-</td>
+  </tr>`;
+}
+
+function renderBranchReport() {
+  const branches = [...new Set(appData.accounts.map(a => a.branch).filter(Boolean))].sort();
+  const tbody = document.getElementById('reportBranchBody');
+
+  if (branches.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--gray-400);">No data</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = branches.map(br => {
+    const accs = appData.accounts.filter(a => a.branch === br && a.category !== 'Resolved');
+    const sma0 = accs.filter(a => a.category === 'SMA-0').length;
+    const sma1 = accs.filter(a => a.category === 'SMA-1').length;
+    const sma2 = accs.filter(a => a.category === 'SMA-2').length;
+    const npa = accs.filter(a => isNPA(a.category)).length;
+    const os = accs.reduce((s,a) => s + (parseFloat(a.outstandingAmount)||0), 0);
+    return `<tr>
+      <td>${br}</td>
+      <td>${accs.length}</td>
+      <td>${sma0}</td>
+      <td>${sma1}</td>
+      <td>${sma2}</td>
+      <td>${npa}</td>
+      <td>${formatCurrency(os)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderActivityReport() {
+  const from = document.getElementById('reportDateFrom').value;
+  const to = document.getElementById('reportDateTo').value;
+  const tbody = document.getElementById('reportActivityBody');
+
+  let fups = appData.followUps;
+  if (from) fups = fups.filter(f => f.date >= from);
+  if (to) fups = fups.filter(f => f.date <= to);
+
+  const types = ['Phone Call', 'Personal Visit', 'Notice Sent', 'Email', 'Legal Action', 'Restructure Discussion', 'Recovery', 'Other'];
+  tbody.innerHTML = types.map(type => {
+    const items = fups.filter(f => f.actionType === type);
+    const uniqueAccounts = new Set(items.map(f => f.accountId));
+    return `<tr>
+      <td>${type}</td>
+      <td>${items.length}</td>
+      <td>${uniqueAccounts.size}</td>
+    </tr>`;
+  }).join('') + `<tr style="font-weight:700;background:var(--gray-100);">
+    <td>TOTAL</td>
+    <td>${fups.length}</td>
+    <td>${new Set(fups.map(f => f.accountId)).size}</td>
+  </tr>`;
+}
+
+// ==================== EXPORT / IMPORT ====================
+function exportData() {
+  // Export as CSV
+  if (appData.accounts.length === 0) {
+    showToast('No data to export', 'error');
+    return;
+  }
+
+  const headers = ['Account No','Borrower Name','Contact','Email','Address','Loan Type',
+    'Sanction Amount','Outstanding Amount','Overdue Amount','EMI Amount','DPD','Category',
+    'NPA Date','Priority','Branch','RM','Security','Guarantor','Remarks',
+    'Total Follow-Ups','Last Follow-Up Date','Last Follow-Up Type'];
+
+  const rows = appData.accounts.map(acc => {
+    const lastFu = getLastFollowUp(acc.id);
+    const fuCount = appData.followUps.filter(f => f.accountId === acc.id).length;
+    return [
+      acc.accountNo, acc.borrowerName, acc.contactNo, acc.email, acc.address, acc.loanType,
+      acc.sanctionAmount, acc.outstandingAmount, acc.overdueAmount, acc.emiAmount,
+      acc.dpd, acc.category, acc.npaDate, computePriority(acc), acc.branch, acc.rm,
+      acc.security, acc.guarantor, acc.remarks,
+      fuCount, lastFu ? lastFu.date : '', lastFu ? lastFu.actionType : ''
+    ].map(v => `"${(v == null ? '' : String(v)).replace(/"/g, '""')}"`);
+  });
+
+  const csv = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sma_npa_report_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported successfully', 'success');
+}
+
+function importDataPrompt() {
+  document.getElementById('importFileInput').click();
+}
+
+function handleImport(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      if (file.name.endsWith('.json')) {
+        const imported = JSON.parse(e.target.result);
+        if (imported.accounts && Array.isArray(imported.accounts)) {
+          appData.accounts = [...appData.accounts, ...imported.accounts];
+          if (imported.followUps) {
+            appData.followUps = [...appData.followUps, ...imported.followUps];
+          }
+          saveData(appData);
+          showToast(`Imported ${imported.accounts.length} accounts`, 'success');
+          renderCurrentTab();
+        } else {
+          showToast('Invalid JSON format', 'error');
+        }
+      } else {
+        showToast('Please use JSON format for import. Export your data first to see the format.', 'error');
+      }
+    } catch(err) {
+      showToast('Error importing file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// Also allow exporting full JSON backup
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(appData, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `sma_npa_backup_${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ==================== RENDER HELPERS ====================
+function renderCurrentTab() {
+  const active = document.querySelector('.tab.active');
+  if (active) switchTab(active.dataset.tab);
+}
+
+// Auto-suggest category when DPD changes
+document.getElementById('fDpd').addEventListener('input', function() {
+  const dpd = parseInt(this.value) || 0;
+  const catSel = document.getElementById('fCategory');
+  if (!catSel.value || catSel.value.startsWith('SMA')) {
+    catSel.value = suggestCategory(dpd);
+  }
+});
+
+// ==================== KEYBOARD SHORTCUTS ====================
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open'));
+  }
+});
+
+// ==================== SAMPLE DATA (for demo) ====================
+function loadSampleData() {
+  if (appData.accounts.length > 0) {
+    document.getElementById('confirmTitle').textContent = 'Load Sample Data';
+    document.getElementById('confirmMessage').textContent = 'This will add sample accounts to your existing data. Continue?';
+    document.getElementById('confirmOkBtn').onclick = () => { addSampleData(); closeModal('confirmModal'); };
+    openModal('confirmModal');
+  } else {
+    addSampleData();
+  }
+}
+
+function addSampleData() {
+  const sampleAccounts = [
+    { id: generateId(), accountNo: '20240001', borrowerName: 'Rajesh Kumar', contactNo: '9876543210', email: 'rajesh@email.com', address: '12, MG Road, Mumbai', loanType: 'Home Loan', sanctionAmount: 5000000, outstandingAmount: 4200000, overdueAmount: 180000, emiAmount: 45000, dpd: 45, category: 'SMA-1', npaDate: '', priority: 'Auto', branch: 'Mumbai Main', rm: 'Amit Shah', security: 'Residential Property - Andheri', guarantor: 'Suresh Kumar', remarks: 'Borrower facing temporary cash flow issues due to job change', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: generateId(), accountNo: '20240002', borrowerName: 'Priya Sharma', contactNo: '9876543211', email: 'priya.s@email.com', address: '45, Sector 15, Gurgaon', loanType: 'Vehicle Loan', sanctionAmount: 800000, outstandingAmount: 520000, overdueAmount: 48000, emiAmount: 16000, dpd: 72, category: 'SMA-2', npaDate: '', priority: 'Auto', branch: 'Gurgaon Sec 15', rm: 'Neha Gupta', security: 'Hyundai Creta 2023', guarantor: '', remarks: 'Multiple attempts to contact - phone unreachable', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: generateId(), accountNo: '20240003', borrowerName: 'Mohammed Ismail', contactNo: '9876543212', email: 'ismail.m@email.com', address: '78, Commercial Street, Bangalore', loanType: 'Business Loan', sanctionAmount: 2500000, outstandingAmount: 2100000, overdueAmount: 350000, emiAmount: 52000, dpd: 120, category: 'NPA-Substandard', npaDate: '2024-10-15', priority: 'High', branch: 'Bangalore Central', rm: 'Suresh Reddy', security: 'Commercial Property', guarantor: 'Ahmed Khan', remarks: 'Business slowdown due to market conditions. Legal notice sent.', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: generateId(), accountNo: '20240004', borrowerName: 'Sunita Devi', contactNo: '9876543213', email: '', address: 'Village Rampur, Dist. Varanasi', loanType: 'Agriculture Loan', sanctionAmount: 300000, outstandingAmount: 280000, overdueAmount: 35000, emiAmount: 8000, dpd: 25, category: 'SMA-0', npaDate: '', priority: 'Auto', branch: 'Varanasi Rural', rm: 'Ravi Mishra', security: 'Gold Ornaments', guarantor: 'Ram Prasad', remarks: 'Crop failure last season. Expecting payment after harvest.', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: generateId(), accountNo: '20240005', borrowerName: 'Anil Patel', contactNo: '9876543214', email: 'anil.patel@email.com', address: '23, CG Road, Ahmedabad', loanType: 'MSME Loan', sanctionAmount: 1500000, outstandingAmount: 1350000, overdueAmount: 220000, emiAmount: 38000, dpd: 95, category: 'NPA-Substandard', npaDate: '2024-11-01', priority: 'High', branch: 'Ahmedabad CG Road', rm: 'Deepak Joshi', security: 'Plant & Machinery', guarantor: 'Bhavesh Patel', remarks: 'Unit partially shut. Restructuring under discussion.', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() },
+    { id: generateId(), accountNo: '20240006', borrowerName: 'Kavitha Nair', contactNo: '9876543215', email: 'kavitha.n@email.com', address: '56, Marine Drive, Kochi', loanType: 'Personal Loan', sanctionAmount: 500000, outstandingAmount: 380000, overdueAmount: 60000, emiAmount: 15000, dpd: 55, category: 'SMA-1', npaDate: '', priority: 'Auto', branch: 'Kochi Marine', rm: 'Thomas Mathew', security: 'None', guarantor: '', remarks: 'Medical emergency in family. Requested 3-month moratorium.', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+  ];
+
+  // Add sample follow-ups
+  const sampleFollowUps = [];
+  sampleAccounts.forEach((acc, idx) => {
+    if (idx < 4) {
+      const d = new Date(); d.setDate(d.getDate() - (10 + idx * 5));
+      sampleFollowUps.push({
+        id: generateId(), accountId: acc.id, actionType: 'Phone Call', date: d.toISOString().split('T')[0],
+        contactedPerson: acc.borrowerName, followUpBy: acc.rm,
+        notes: 'Called borrower regarding overdue payment. ' + (idx % 2 === 0 ? 'Borrower promised to pay within a week.' : 'Borrower not reachable, left voicemail.'),
+        response: idx % 2 === 0 ? 'Will arrange payment by next week' : 'No response',
+        promiseDate: idx % 2 === 0 ? new Date(Date.now() + 7*86400000).toISOString().split('T')[0] : '',
+        amountPromised: idx % 2 === 0 ? acc.overdueAmount : 0,
+        nextDate: new Date(Date.now() + (3 + idx) * 86400000).toISOString().split('T')[0],
+        nextAction: idx % 2 === 0 ? 'Phone Call' : 'Personal Visit',
+        createdAt: new Date().toISOString()
+      });
+    }
+  });
+
+  appData.accounts = [...appData.accounts, ...sampleAccounts];
+  appData.followUps = [...appData.followUps, ...sampleFollowUps];
+  saveData(appData);
+  showToast('Sample data loaded successfully', 'success');
+  renderCurrentTab();
+}
+
+// ==================== INIT ====================
+(function init() {
+  renderDashboard();
+  updateBranchFilter();
+
+  // Show sample data option if empty
+  if (appData.accounts.length === 0) {
+    const statsGrid = document.getElementById('statsGrid');
+    statsGrid.innerHTML = `
+      <div style="grid-column:1/-1;text-align:center;padding:40px;">
+        <div style="font-size:48px;margin-bottom:12px;">&#128202;</div>
+        <h2 style="font-size:18px;margin-bottom:8px;">Welcome to SMA / NPA Follow-Up Tool</h2>
+        <p style="color:var(--gray-500);margin-bottom:20px;">Start by adding accounts or load sample data to explore the tool.</p>
+        <button class="btn btn-primary" onclick="openAccountModal()" style="margin-right:10px;">+ Add Account</button>
+        <button class="btn btn-outline" onclick="loadSampleData()">Load Sample Data</button>
+      </div>
+    `;
+  }
+})();
+</script>
+</body>
+</html>

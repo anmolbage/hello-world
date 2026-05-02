@@ -17,22 +17,19 @@ class StopsFragment : Fragment() {
     private lateinit var repository: TourRepository
     private lateinit var adapter: StopAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_stops, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = inflater.inflate(R.layout.fragment_stops, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         repository = TourRepository(requireContext())
-        val rvStops = view.findViewById<RecyclerView>(R.id.rvStops)
+        val rv = view.findViewById<RecyclerView>(R.id.rvStops)
         val tvEmpty = view.findViewById<TextView>(R.id.tvEmptyStops)
-        adapter = StopAdapter { stop ->
-            startActivity(Intent(requireContext(), VisitDetailActivity::class.java).apply { putExtra(VisitDetailActivity.EXTRA_STOP_ID, stop.id) })
-        }
-        rvStops.layoutManager = LinearLayoutManager(requireContext()); rvStops.adapter = adapter
+        adapter = StopAdapter { stop -> startActivity(Intent(requireContext(), VisitDetailActivity::class.java).apply { putExtra(VisitDetailActivity.EXTRA_STOP_ID, stop.id) }) }
+        rv.layoutManager = LinearLayoutManager(requireContext()); rv.adapter = adapter
         repository.getUnclassifiedStops().observe(viewLifecycleOwner) { stops ->
             adapter.submitList(stops)
-            if (stops.isEmpty()) { rvStops.visibility = View.GONE; tvEmpty.visibility = View.VISIBLE }
-            else { rvStops.visibility = View.VISIBLE; tvEmpty.visibility = View.GONE }
+            rv.visibility = if (stops.isEmpty()) View.GONE else View.VISIBLE
+            tvEmpty.visibility = if (stops.isEmpty()) View.VISIBLE else View.GONE
         }
     }
 }

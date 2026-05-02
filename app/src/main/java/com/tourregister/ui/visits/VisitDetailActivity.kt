@@ -35,90 +35,63 @@ class VisitDetailActivity : AppCompatActivity() {
     private val chipToPurpose = mutableMapOf<Int, VisitPurpose>()
 
     private val takePictureLauncher = registerForActivityResult(ActivityResultContracts.TakePicture()) { success ->
-        if (success && photoUri != null) {
-            val ivPhoto = findViewById<ImageView>(R.id.ivPhoto)
-            ivPhoto.setImageURI(photoUri); ivPhoto.visibility = android.view.View.VISIBLE
-        }
+        if (success && photoUri != null) { val iv = findViewById<ImageView>(R.id.ivPhoto); iv.setImageURI(photoUri); iv.visibility = android.view.View.VISIBLE }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_visit_detail)
         repository = TourRepository(this); prefs = PrefsManager(this)
-        val stopId = intent.getLongExtra(EXTRA_STOP_ID, -1)
-        if (stopId == -1L) { finish(); return }
-        setupChipMapping(); setupListeners(); loadStop(stopId)
-    }
-
-    private fun setupChipMapping() {
-        chipToPurpose[R.id.chipGovtMeeting] = VisitPurpose.GOVT_MEETING
-        chipToPurpose[R.id.chipOfficialMeeting] = VisitPurpose.OFFICIAL_MEETING
-        chipToPurpose[R.id.chipCustomerMeeting] = VisitPurpose.CUSTOMER_MEETING
-        chipToPurpose[R.id.chipPreSanction] = VisitPurpose.PRE_SANCTION_INSPECTION
-        chipToPurpose[R.id.chipPostSanction] = VisitPurpose.POST_SANCTION_INSPECTION
-        chipToPurpose[R.id.chipLeadFollowup] = VisitPurpose.LEAD_FOLLOWUP
-        chipToPurpose[R.id.chipNoticeServe] = VisitPurpose.NOTICE_SERVE
-        chipToPurpose[R.id.chipRecoveryVisit] = VisitPurpose.RECOVERY_VISIT
+        val stopId = intent.getLongExtra(EXTRA_STOP_ID, -1); if (stopId == -1L) { finish(); return }
+        chipToPurpose[R.id.chipGovtMeeting] = VisitPurpose.GOVT_MEETING; chipToPurpose[R.id.chipOfficialMeeting] = VisitPurpose.OFFICIAL_MEETING
+        chipToPurpose[R.id.chipCustomerMeeting] = VisitPurpose.CUSTOMER_MEETING; chipToPurpose[R.id.chipPreSanction] = VisitPurpose.PRE_SANCTION_INSPECTION
+        chipToPurpose[R.id.chipPostSanction] = VisitPurpose.POST_SANCTION_INSPECTION; chipToPurpose[R.id.chipLeadFollowup] = VisitPurpose.LEAD_FOLLOWUP
+        chipToPurpose[R.id.chipNoticeServe] = VisitPurpose.NOTICE_SERVE; chipToPurpose[R.id.chipRecoveryVisit] = VisitPurpose.RECOVERY_VISIT
         chipToPurpose[R.id.chipOthers] = VisitPurpose.OTHERS
-    }
 
-    private fun setupListeners() {
         findViewById<MaterialButton>(R.id.btnBack).setOnClickListener { finish() }
-        findViewById<ChipGroup>(R.id.chipGroupPurpose).setOnCheckedStateChangeListener { _, checkedIds ->
-            if (checkedIds.isNotEmpty()) selectedPurpose = chipToPurpose[checkedIds[0]]
-        }
+        findViewById<ChipGroup>(R.id.chipGroupPurpose).setOnCheckedStateChangeListener { _, ids -> if (ids.isNotEmpty()) selectedPurpose = chipToPurpose[ids[0]] }
         findViewById<MaterialButton>(R.id.btnAttachPhoto).setOnClickListener { takePhoto() }
         findViewById<MaterialButton>(R.id.btnSave).setOnClickListener { saveVisit() }
-    }
 
-    private fun loadStop(stopId: Long) {
         scope.launch {
-            val loadedStop = withContext(Dispatchers.IO) { repository.getStopById(stopId) }
-            if (loadedStop == null) { finish(); return@launch }
-            stop = loadedStop; populateStopInfo(loadedStop)
+            val loaded = withContext(Dispatchers.IO) { repository.getStopById(stopId) }
+            if (loaded == null) { finish(); return@launch }
+            stop = loaded
+            findViewById<TextView>(R.id.tvTimeIn).text = DateUtils.formatTime(loaded.arrivalTime)
+            val dep = if (loaded.departureTime > 0) loaded.departureTime else System.currentTimeMillis()
+            findViewById<TextView>(R.id.tvTimeOut).text = if (loaded.departureTime > 0) DateUtils.formatTime(loaded.departureTime) else "Ongoing"
+            findViewById<TextView>(R.id.tvDuration).text = DateUtils.formatDurationFromMillis(dep - loaded.arrivalTime)
+            findViewById<TextView>(R.id.tvAddress).text = loaded.address.ifEmpty { "Unknown" }
         }
-    }
-
-    private fun populateStopInfo(stop: DetectedStop) {
-        findViewById<TextView>(R.id.tvTimeIn).text = DateUtils.formatTime(stop.arrivalTime)
-        val departure = if (stop.departureTime > 0) stop.departureTime else System.currentTimeMillis()
-        findViewById<TextView>(R.id.tvTimeOut).text = if (stop.departureTime > 0) DateUtils.formatTime(stop.departureTime) else "Ongoing"
-        findViewById<TextView>(R.id.tvDuration).text = DateUtils.formatDurationFromMillis(departure - stop.arrivalTime)
-        findViewById<TextView>(R.id.tvAddress).text = stop.address.ifEmpty { "Unknown" }
     }
 
     private fun takePhoto() {
-        val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-        val storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES)
-        val photoFile = File.createTempFile("VISIT_${timeStamp}_", ".jpg", storageDir)
-        photoPath = photoFile.absolutePath
-        photoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", photoFile)
+        val ts = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+        val file = File.createTempFile("VISIT_${ts}_", ".jpg", getExternalFilesDir(Environment.DIRECTORY_PICTURES))
+        photoPath = file.absolutePath
+        photoUri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
         takePictureLauncher.launch(photoUri)
     }
 
     private fun saveVisit() {
-        val currentStop = stop ?: return
-        val purpose = selectedPurpose
-        if (purpose == null) { Toast.makeText(this, "Please select a purpose", Toast.LENGTH_SHORT).show(); return }
+        val s = stop ?: return; val p = selectedPurpose
+        if (p == null) { Toast.makeText(this, "Please select a purpose", Toast.LENGTH_SHORT).show(); return }
         val notes = findViewById<TextInputEditText>(R.id.etNotes).text?.toString() ?: ""
-        val departure = if (currentStop.departureTime > 0) currentStop.departureTime else System.currentTimeMillis()
-        val durationMinutes = DateUtils.durationMinutes(currentStop.arrivalTime, departure)
-
+        val dep = if (s.departureTime > 0) s.departureTime else System.currentTimeMillis()
         scope.launch {
-            val distance = withContext(Dispatchers.IO) {
-                val lastPoint = repository.getLastLocationPoint()
-                if (lastPoint != null) repository.calculateDistance(lastPoint.latitude, lastPoint.longitude, currentStop.latitude, currentStop.longitude).toDouble() / 1000.0
-                else repository.calculateDistance(prefs.getGeofenceLatitude(), prefs.getGeofenceLongitude(), currentStop.latitude, currentStop.longitude).toDouble() / 1000.0
+            val dist = withContext(Dispatchers.IO) {
+                val last = repository.getLastLocationPoint()
+                if (last != null) repository.calculateDistance(last.latitude, last.longitude, s.latitude, s.longitude).toDouble() / 1000.0
+                else repository.calculateDistance(prefs.getGeofenceLatitude(), prefs.getGeofenceLongitude(), s.latitude, s.longitude).toDouble() / 1000.0
             }
-            val visit = Visit(stopId = currentStop.id, date = currentStop.date, timeIn = currentStop.arrivalTime, timeOut = departure,
-                durationMinutes = durationMinutes, distanceKm = distance, latitude = currentStop.latitude, longitude = currentStop.longitude,
-                address = currentStop.address, purpose = purpose.name, notes = notes, photoPath = photoPath)
-            withContext(Dispatchers.IO) { repository.insertVisit(visit); repository.markStopClassified(currentStop.id); repository.updateDailyStats(currentStop.date) }
+            val visit = Visit(stopId = s.id, date = s.date, timeIn = s.arrivalTime, timeOut = dep, durationMinutes = DateUtils.durationMinutes(s.arrivalTime, dep),
+                distanceKm = dist, latitude = s.latitude, longitude = s.longitude, address = s.address, purpose = p.name, notes = notes, photoPath = photoPath)
+            withContext(Dispatchers.IO) { repository.insertVisit(visit); repository.markStopClassified(s.id); repository.updateDailyStats(s.date) }
             Toast.makeText(this@VisitDetailActivity, R.string.visit_saved, Toast.LENGTH_SHORT).show(); finish()
         }
     }
 
     override fun onDestroy() { super.onDestroy(); scope.cancel() }
-
     companion object { const val EXTRA_STOP_ID = "extra_stop_id" }
 }

@@ -9,7 +9,6 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -25,49 +24,46 @@ import kotlinx.coroutines.*
 class GeofenceSetupActivity : AppCompatActivity() {
     private lateinit var prefs: PrefsManager
     private lateinit var repository: TourRepository
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var selectedLat: Double? = null
     private var selectedLon: Double? = null
 
-    private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        if (permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true) fetchCurrentLocation()
+    private val locationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { perms ->
+        if (perms[Manifest.permission.ACCESS_FINE_LOCATION] == true) fetchCurrentLocation()
         else Toast.makeText(this, R.string.location_permission_rationale, Toast.LENGTH_LONG).show()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_geofence_setup)
-        prefs = PrefsManager(this); repository = TourRepository(this)
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        prefs = PrefsManager(this)
+        repository = TourRepository(this)
 
-        val etBranchName = findViewById<TextInputEditText>(R.id.etBranchName)
-        val etManagerName = findViewById<TextInputEditText>(R.id.etManagerName)
-        val tvCoordinates = findViewById<TextView>(R.id.tvCoordinates)
-        val tvRadiusValue = findViewById<TextView>(R.id.tvRadiusValue)
-        val sliderRadius = findViewById<Slider>(R.id.sliderRadius)
+        val etBranch = findViewById<TextInputEditText>(R.id.etBranchName)
+        val etManager = findViewById<TextInputEditText>(R.id.etManagerName)
+        val tvCoords = findViewById<TextView>(R.id.tvCoordinates)
+        val tvAddr = findViewById<TextView>(R.id.tvAddress)
+        val tvRadius = findViewById<TextView>(R.id.tvRadiusValue)
+        val slider = findViewById<Slider>(R.id.sliderRadius)
         val btnSave = findViewById<MaterialButton>(R.id.btnSave)
 
         if (prefs.isGeofenceSet()) {
             selectedLat = prefs.getGeofenceLatitude(); selectedLon = prefs.getGeofenceLongitude()
-            tvCoordinates.text = String.format("%.6f, %.6f", selectedLat, selectedLon)
-            sliderRadius.value = prefs.getGeofenceRadiusKm(); btnSave.isEnabled = true
+            tvCoords.text = String.format("%.6f, %.6f", selectedLat, selectedLon)
+            slider.value = prefs.getGeofenceRadiusKm(); btnSave.isEnabled = true
         }
-        etBranchName.setText(prefs.getBranchName()); etManagerName.setText(prefs.getUserName())
-
-        sliderRadius.addOnChangeListener { _, value, _ -> tvRadiusValue.text = String.format("%.1f km", value) }
-
+        etBranch.setText(prefs.getBranchName()); etManager.setText(prefs.getUserName())
+        slider.addOnChangeListener { _, value, _ -> tvRadius.text = String.format("%.1f km", value) }
         findViewById<MaterialButton>(R.id.btnUseCurrentLocation).setOnClickListener {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) fetchCurrentLocation()
             else locationPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))
         }
-
         btnSave.setOnClickListener {
             val lat = selectedLat; val lon = selectedLon
             if (lat != null && lon != null) {
-                prefs.setGeofence(lat, lon, sliderRadius.value)
-                prefs.setBranchName(etBranchName.text?.toString() ?: "")
-                prefs.setUserName(etManagerName.text?.toString() ?: "Branch Manager")
+                prefs.setGeofence(lat, lon, slider.value)
+                prefs.setBranchName(etBranch.text?.toString() ?: "")
+                prefs.setUserName(etManager.text?.toString() ?: "Branch Manager")
                 Toast.makeText(this, R.string.geofence_saved, Toast.LENGTH_SHORT).show()
                 startActivity(Intent(this, MainActivity::class.java)); finish()
             }
@@ -76,19 +72,19 @@ class GeofenceSetupActivity : AppCompatActivity() {
 
     private fun fetchCurrentLocation() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) return
-        val tvCoordinates = findViewById<TextView>(R.id.tvCoordinates)
-        val tvAddress = findViewById<TextView>(R.id.tvAddress)
+        val tvCoords = findViewById<TextView>(R.id.tvCoordinates)
+        val tvAddr = findViewById<TextView>(R.id.tvAddress)
         val btnSave = findViewById<MaterialButton>(R.id.btnSave)
-        tvCoordinates.text = getString(R.string.loading)
-        fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
-            .addOnSuccessListener { location ->
-                if (location != null) {
-                    selectedLat = location.latitude; selectedLon = location.longitude
-                    tvCoordinates.text = String.format("%.6f, %.6f", location.latitude, location.longitude)
-                    btnSave.isEnabled = true
-                    scope.launch { tvAddress.text = repository.reverseGeocode(location.latitude, location.longitude) }
-                } else tvCoordinates.text = "Could not get location. Try again."
-            }.addOnFailureListener { tvCoordinates.text = "Location error. Try again." }
+        tvCoords.text = getString(R.string.loading)
+        LocationServices.getFusedLocationProviderClient(this)
+            .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, CancellationTokenSource().token)
+            .addOnSuccessListener { loc ->
+                if (loc != null) {
+                    selectedLat = loc.latitude; selectedLon = loc.longitude
+                    tvCoords.text = String.format("%.6f, %.6f", loc.latitude, loc.longitude); btnSave.isEnabled = true
+                    scope.launch { tvAddr.text = repository.reverseGeocode(loc.latitude, loc.longitude) }
+                } else tvCoords.text = "Could not get location. Try again."
+            }.addOnFailureListener { tvCoords.text = "Location error. Try again." }
     }
 
     override fun onDestroy() { super.onDestroy(); scope.cancel() }

@@ -15,20 +15,18 @@ class VisitsFragment : Fragment() {
     private lateinit var repository: TourRepository
     private lateinit var adapter: VisitAdapter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View =
-        inflater.inflate(R.layout.fragment_visits, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View = inflater.inflate(R.layout.fragment_visits, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         repository = TourRepository(requireContext())
-        val rvVisits = view.findViewById<RecyclerView>(R.id.rvVisits)
+        val rv = view.findViewById<RecyclerView>(R.id.rvVisits)
         val tvEmpty = view.findViewById<TextView>(R.id.tvEmptyVisits)
-        adapter = VisitAdapter()
-        rvVisits.layoutManager = LinearLayoutManager(requireContext()); rvVisits.adapter = adapter
+        adapter = VisitAdapter(); rv.layoutManager = LinearLayoutManager(requireContext()); rv.adapter = adapter
         repository.getAllVisits().observe(viewLifecycleOwner) { visits ->
             adapter.submitList(visits)
-            if (visits.isEmpty()) { rvVisits.visibility = View.GONE; tvEmpty.visibility = View.VISIBLE }
-            else { rvVisits.visibility = View.VISIBLE; tvEmpty.visibility = View.GONE }
+            rv.visibility = if (visits.isEmpty()) View.GONE else View.VISIBLE
+            tvEmpty.visibility = if (visits.isEmpty()) View.VISIBLE else View.GONE
         }
     }
 }

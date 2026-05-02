@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/nav_dashboard"
+            android:textSize="@dimen/text_heading" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="4dp" />
+        <TextView android:id="@+id/tvDate" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="14sp" android:textColor="@color/on_surface_secondary" android:layout_marginBottom="16dp" />
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp" android:gravity="center">
+                <View android:id="@+id/statusIndicator" android:layout_width="12dp" android:layout_height="12dp"
+                    android:background="@drawable/pin_dot_filled" android:backgroundTint="@color/tracking_inactive" android:layout_marginBottom="8dp" />
+                <TextView android:id="@+id/tvTrackingStatus" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/tracking_inactive" android:textSize="@dimen/text_body" android:textStyle="bold" android:layout_marginBottom="4dp" />
+                <TextView android:id="@+id/tvLocationStatus" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="14sp" android:textColor="@color/on_surface_secondary" android:layout_marginBottom="16dp" />
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnToggleTracking" style="@style/LargeButton"
+                    android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/start_tracking" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Today"
+            android:textSize="@dimen/text_body" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginEnd="8dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:id="@+id/tvDailyKm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.0"
+                        android:textSize="@dimen/text_stat_value" android:textStyle="bold" android:textColor="@color/primary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/today_km"
+                        android:textSize="@dimen/text_caption" android:textColor="@color/on_surface_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginStart="8dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:id="@+id/tvDailyHours" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0h 0m"
+                        android:textSize="@dimen/text_stat_value" android:textStyle="bold" android:textColor="@color/accent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/field_hours"
+                        android:textSize="@dimen/text_caption" android:textColor="@color/on_surface_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="This Month"
+            android:textSize="@dimen/text_body" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="8dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginEnd="8dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:id="@+id/tvMonthlyKm" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.0"
+                        android:textSize="@dimen/text_stat_value" android:textStyle="bold" android:textColor="@color/primary" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/monthly_km"
+                        android:textSize="@dimen/text_caption" android:textColor="@color/on_surface_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+            <com.google.android.material.card.MaterialCardView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginStart="8dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp" android:gravity="center">
+                    <TextView android:id="@+id/tvMonthlyHours" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0h 0m"
+                        android:textSize="@dimen/text_stat_value" android:textStyle="bold" android:textColor="@color/accent" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Field Hours"
+                        android:textSize="@dimen/text_caption" android:textColor="@color/on_surface_secondary" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+        <com.google.android.material.card.MaterialCardView android:id="@+id/cardUnclassified" android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" app:cardBackgroundColor="#FFF3E0"
+            android:visibility="gone" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:padding="16dp" android:gravity="center_vertical">
+                <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Unclassified Stops" android:textStyle="bold" android:textColor="@color/accent" />
+                    <TextView android:id="@+id/tvUnclassifiedCount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+                </LinearLayout>
+                <com.google.android.material.button.MaterialButton android:id="@+id/btnClassifyStops" style="@style/Widget.Material3.Button.TonalButton"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Classify" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="16dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnExport" style="@style/LargeOutlinedButton"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/nav_export" android:layout_marginEnd="8dp" />
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnGeofence" style="@style/LargeOutlinedButton"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Branch" android:layout_marginStart="8dp" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

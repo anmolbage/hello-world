@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="24dp">
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/setup_geofence"
+            android:textSize="@dimen/text_heading" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="8dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="Set your branch office location. Tracking will start when you leave this area."
+            android:textSize="@dimen/text_body" android:textColor="@color/on_surface_secondary" android:layout_marginBottom="32dp" />
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Branch Name" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etBranchName" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="@dimen/text_body" android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="Your Name" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_marginBottom="24dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etManagerName" android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:textSize="@dimen/text_body" android:inputType="textPersonName" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Branch Location"
+                    android:textStyle="bold" android:textSize="@dimen/text_body" android:textColor="@color/on_surface" />
+                <TextView android:id="@+id/tvCoordinates" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="Not set" android:textSize="14sp" android:textColor="@color/on_surface_secondary" android:layout_marginTop="4dp" />
+                <TextView android:id="@+id/tvAddress" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:textSize="14sp" android:textColor="@color/on_surface_secondary" android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnUseCurrentLocation" style="@style/LargeOutlinedButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/set_current_location"
+            app:icon="@android:drawable/ic_menu_mylocation" android:layout_marginBottom="16dp" />
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/geofence_radius"
+            android:textSize="@dimen/text_body" android:textColor="@color/on_surface" android:layout_marginBottom="4dp" />
+        <TextView android:id="@+id/tvRadiusValue" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:text="1.0 km" android:textSize="14sp" android:textColor="@color/on_surface_secondary" android:layout_marginBottom="4dp" />
+        <com.google.android.material.slider.Slider android:id="@+id/sliderRadius" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:valueFrom="0.5" android:valueTo="5.0" android:stepSize="0.5" android:value="1.0" android:layout_marginBottom="32dp" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSave" style="@style/LargeButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/save" android:enabled="false" />
+    </LinearLayout>
+</ScrollView>

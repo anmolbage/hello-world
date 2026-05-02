@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="match_parent" android:background="@color/background">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal"
+            android:gravity="center_vertical" android:layout_marginBottom="16dp">
+            <com.google.android.material.button.MaterialButton android:id="@+id/btnBack" style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp" android:layout_height="48dp" app:icon="@android:drawable/ic_menu_revert" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/classify_stop"
+                android:textSize="@dimen/text_heading" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginStart="8dp" />
+        </LinearLayout>
+        <com.google.android.material.card.MaterialCardView android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation" android:layout_marginBottom="16dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/time_in" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+                    <TextView android:id="@+id/tvTimeIn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:textSize="@dimen/text_body" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/time_out" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+                    <TextView android:id="@+id/tvTimeOut" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:textSize="@dimen/text_body" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/duration" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+                    <TextView android:id="@+id/tvDuration" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:textSize="@dimen/text_body" android:textStyle="bold" />
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="@string/location" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+                    <TextView android:id="@+id/tvAddress" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="2" android:textSize="14sp" android:textColor="@color/on_surface" />
+                </LinearLayout>
+            </LinearLayout>
+        </com.google.android.material.card.MaterialCardView>
+        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/select_purpose"
+            android:textSize="@dimen/text_body" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="12dp" />
+        <com.google.android.material.chip.ChipGroup android:id="@+id/chipGroupPurpose" android:layout_width="match_parent" android:layout_height="wrap_content"
+            app:singleSelection="true" app:selectionRequired="true" android:layout_marginBottom="16dp">
+            <com.google.android.material.chip.Chip android:id="@+id/chipGovtMeeting" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_govt_meeting" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipOfficialMeeting" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_official_meeting" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipCustomerMeeting" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_customer_meeting" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipPreSanction" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_pre_sanction" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipPostSanction" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_post_sanction" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipLeadFollowup" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_lead_followup" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipNoticeServe" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_notice_serve" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipRecoveryVisit" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_recovery_visit" android:textSize="14sp" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipOthers" style="@style/Widget.Material3.Chip.Filter" android:layout_width="wrap_content" android:layout_height="48dp" android:text="@string/purpose_others" android:textSize="14sp" />
+        </com.google.android.material.chip.ChipGroup>
+        <com.google.android.material.textfield.TextInputLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:hint="@string/add_notes" style="@style/Widget.Material3.TextInputLayout.OutlinedBox" android:layout_marginBottom="16dp">
+            <com.google.android.material.textfield.TextInputEditText android:id="@+id/etNotes" android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:inputType="textMultiLine" android:minLines="2" android:maxLines="4" android:textSize="@dimen/text_body" />
+        </com.google.android.material.textfield.TextInputLayout>
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnAttachPhoto" style="@style/LargeOutlinedButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/attach_photo"
+            app:icon="@android:drawable/ic_menu_camera" android:layout_marginBottom="8dp" />
+        <ImageView android:id="@+id/ivPhoto" android:layout_width="match_parent" android:layout_height="200dp" android:scaleType="centerCrop"
+            android:visibility="gone" android:layout_marginBottom="16dp" android:contentDescription="Attached photo" />
+        <com.google.android.material.button.MaterialButton android:id="@+id/btnSave" style="@style/LargeButton"
+            android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/save_visit" android:layout_marginBottom="32dp" />
+    </LinearLayout>
+</ScrollView>

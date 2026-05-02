@@ -7,13 +7,11 @@ import androidx.security.crypto.MasterKey
 
 class PrefsManager(context: Context) {
     private val masterKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
-
     private val securePrefs: SharedPreferences = EncryptedSharedPreferences.create(
         context, "tour_register_secure_prefs", masterKey,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
     )
-
     private val prefs: SharedPreferences = context.getSharedPreferences("tour_register_prefs", Context.MODE_PRIVATE)
 
     fun isPinSet(): Boolean = securePrefs.contains(KEY_PIN)
@@ -30,14 +28,11 @@ class PrefsManager(context: Context) {
 
     fun isTrackingActive(): Boolean = prefs.getBoolean(KEY_TRACKING_ACTIVE, false)
     fun setTrackingActive(active: Boolean) { prefs.edit().putBoolean(KEY_TRACKING_ACTIVE, active).apply() }
-
     fun setCurrentStopId(stopId: Long) { prefs.edit().putLong(KEY_CURRENT_STOP_ID, stopId).apply() }
     fun getCurrentStopId(): Long = prefs.getLong(KEY_CURRENT_STOP_ID, -1)
     fun clearCurrentStop() { prefs.edit().remove(KEY_CURRENT_STOP_ID).apply() }
-
     fun setUserName(name: String) { prefs.edit().putString(KEY_USER_NAME, name).apply() }
     fun getUserName(): String = prefs.getString(KEY_USER_NAME, "Branch Manager") ?: "Branch Manager"
-
     fun setBranchName(name: String) { prefs.edit().putString(KEY_BRANCH_NAME, name).apply() }
     fun getBranchName(): String = prefs.getString(KEY_BRANCH_NAME, "") ?: ""
 

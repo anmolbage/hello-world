@@ -13,36 +13,12 @@ object DateUtils {
 
     fun today(): String = dateFormat.format(Date())
     fun currentMonthPrefix(): String = monthPrefixFormat.format(Date())
-
-    fun formatDate(date: String): String {
-        return try {
-            val parsed = dateFormat.parse(date)
-            if (parsed != null) displayDateFormat.format(parsed) else date
-        } catch (e: Exception) { date }
-    }
-
+    fun formatDate(date: String): String = try { displayDateFormat.format(dateFormat.parse(date)!!) } catch (e: Exception) { date }
     fun formatTime(epochMillis: Long): String = timeFormat.format(Date(epochMillis))
     fun formatDateTime(epochMillis: Long): String = dateTimeFormat.format(Date(epochMillis))
-
-    fun formatDuration(minutes: Int): String {
-        val hours = minutes / 60
-        val mins = minutes % 60
-        return when {
-            hours > 0 -> "${hours}h ${mins}m"
-            else -> "${mins}m"
-        }
-    }
-
-    fun formatDurationFromMillis(millis: Long): String {
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(millis).toInt()
-        return formatDuration(minutes)
-    }
-
+    fun formatDuration(minutes: Int): String { val h = minutes / 60; val m = minutes % 60; return if (h > 0) "${h}h ${m}m" else "${m}m" }
+    fun formatDurationFromMillis(millis: Long): String = formatDuration(TimeUnit.MILLISECONDS.toMinutes(millis).toInt())
     fun dateFromEpoch(epochMillis: Long): String = dateFormat.format(Date(epochMillis))
-
-    fun durationMinutes(startMillis: Long, endMillis: Long): Int =
-        TimeUnit.MILLISECONDS.toMinutes(endMillis - startMillis).toInt()
-
-    fun formatDistance(km: Double): String =
-        String.format(Locale.getDefault(), "%.1f km", km)
+    fun durationMinutes(startMillis: Long, endMillis: Long): Int = TimeUnit.MILLISECONDS.toMinutes(endMillis - startMillis).toInt()
+    fun formatDistance(km: Double): String = String.format(Locale.getDefault(), "%.1f km", km)
 }

@@ -32,7 +32,6 @@ class LocationTrackingService : Service() {
     private var lastMovementTime: Long = 0
     private var lastLocation: Location? = null
     private var isStationary = false
-    private var currentStopStartTime: Long = 0
     private var isOutsideGeofence = false
 
     companion object {
@@ -55,7 +54,7 @@ class LocationTrackingService : Service() {
         lastMovementTime = System.currentTimeMillis()
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
-                for (location in result.locations) { processLocation(location) }
+                for (location in result.locations) processLocation(location)
             }
         }
     }
@@ -83,11 +82,8 @@ class LocationTrackingService : Service() {
     }
 
     private fun requestLocationUpdates() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            stopSelf(); return
-        }
-        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL_MS)
-            .setMinUpdateIntervalMillis(FASTEST_INTERVAL_MS).setWaitForAccurateLocation(false).build()
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) { stopSelf(); return }
+        val request = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, LOCATION_INTERVAL_MS).setMinUpdateIntervalMillis(FASTEST_INTERVAL_MS).setWaitForAccurateLocation(false).build()
         fusedLocationClient.requestLocationUpdates(request, locationCallback, Looper.getMainLooper())
     }
 
@@ -96,19 +92,12 @@ class LocationTrackingService : Service() {
         val today = DateUtils.dateFromEpoch(now)
 
         scope.launch {
-            repository.insertLocationPoint(LocationPoint(
-                latitude = location.latitude, longitude = location.longitude,
-                timestamp = now, speed = location.speed, accuracy = location.accuracy, date = today
-            ))
+            repository.insertLocationPoint(LocationPoint(latitude = location.latitude, longitude = location.longitude, timestamp = now, speed = location.speed, accuracy = location.accuracy, date = today))
         }
 
-        val geofenceLat = prefs.getGeofenceLatitude()
-        val geofenceLon = prefs.getGeofenceLongitude()
         val geofenceRadius = prefs.getGeofenceRadiusKm() * 1000
-
         val distFromBranch = FloatArray(1)
-        Location.distanceBetween(location.latitude, location.longitude, geofenceLat, geofenceLon, distFromBranch)
-
+        Location.distanceBetween(location.latitude, location.longitude, prefs.getGeofenceLatitude(), prefs.getGeofenceLongitude(), distFromBranch)
         isOutsideGeofence = distFromBranch[0] > geofenceRadius
 
         if (!isOutsideGeofence) {
@@ -125,11 +114,9 @@ class LocationTrackingService : Service() {
             if (dist > STATIONARY_THRESHOLD_M) {
                 if (isStationary) { scope.launch { finalizeCurrentStop() }; isStationary = false }
                 lastMovementTime = now
-            } else {
-                if (!isStationary && (now - lastMovementTime) >= STOP_DETECTION_MS) {
-                    isStationary = true; currentStopStartTime = lastMovementTime
-                    scope.launch { createNewStop(location, currentStopStartTime, today) }
-                }
+            } else if (!isStationary && (now - lastMovementTime) >= STOP_DETECTION_MS) {
+                isStationary = true
+                scope.launch { createNewStop(location, lastMovementTime, today) }
             }
         } else { lastMovementTime = now }
         lastLocation = location
@@ -137,8 +124,7 @@ class LocationTrackingService : Service() {
 
     private suspend fun createNewStop(location: Location, startTime: Long, date: String) {
         val address = repository.reverseGeocode(location.latitude, location.longitude)
-        val stop = DetectedStop(latitude = location.latitude, longitude = location.longitude, address = address, arrivalTime = startTime, date = date)
-        val id = repository.insertStop(stop)
+        val id = repository.insertStop(DetectedStop(latitude = location.latitude, longitude = location.longitude, address = address, arrivalTime = startTime, date = date))
         prefs.setCurrentStopId(id)
         sendStopNotification(address)
     }
@@ -154,8 +140,7 @@ class LocationTrackingService : Service() {
         val notification = NotificationCompat.Builder(this, TourRegisterApp.CHANNEL_STOPS)
             .setSmallIcon(R.drawable.ic_stop_notification).setContentTitle(getString(R.string.stop_detected))
             .setContentText("Stopped at: $address").setContentIntent(pendingIntent).setAutoCancel(true).build()
-        val manager = getSystemService(android.app.NotificationManager::class.java)
-        manager.notify((System.currentTimeMillis() % 10000).toInt(), notification)
+        getSystemService(android.app.NotificationManager::class.java).notify((System.currentTimeMillis() % 10000).toInt(), notification)
     }
 
     private fun createNotification(text: String): Notification {
@@ -167,11 +152,8 @@ class LocationTrackingService : Service() {
     }
 
     private fun updateNotification(text: String) {
-        val manager = getSystemService(android.app.NotificationManager::class.java)
-        manager.notify(NOTIFICATION_ID, createNotification(text))
+        getSystemService(android.app.NotificationManager::class.java).notify(NOTIFICATION_ID, createNotification(text))
     }
 
-    override fun onDestroy() {
-        super.onDestroy(); scope.cancel(); fusedLocationClient.removeLocationUpdates(locationCallback)
-    }
+    override fun onDestroy() { super.onDestroy(); scope.cancel(); fusedLocationClient.removeLocationUpdates(locationCallback) }
 }

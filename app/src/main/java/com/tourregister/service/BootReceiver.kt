@@ -10,8 +10,7 @@ class BootReceiver : BroadcastReceiver() {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
             val prefs = PrefsManager(context)
             if (prefs.isTrackingActive()) {
-                val serviceIntent = Intent(context, LocationTrackingService::class.java).apply { action = LocationTrackingService.ACTION_START }
-                context.startForegroundService(serviceIntent)
+                context.startForegroundService(Intent(context, LocationTrackingService::class.java).apply { action = LocationTrackingService.ACTION_START })
             }
         }
     }

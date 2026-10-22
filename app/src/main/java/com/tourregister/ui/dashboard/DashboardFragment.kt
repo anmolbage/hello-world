@@ -37,8 +37,8 @@ class DashboardFragment : Fragment() {
         updateTrackingUI(btnToggle, tvStatus, indicator)
         btnToggle.setOnClickListener {
             val act = requireActivity() as MainActivity
-            if (prefs.isTrackingActive()) { act.stopTracking(); prefs.setTrackingActive(false) }
-            else { act.startTracking(); prefs.setTrackingActive(true) }
+            if (prefs.isTrackingActive()) { prefs.setTrackingActive(false); act.stopTracking() }
+            else { prefs.setTrackingActive(true); act.startTracking() }
             updateTrackingUI(btnToggle, tvStatus, indicator)
         }
 

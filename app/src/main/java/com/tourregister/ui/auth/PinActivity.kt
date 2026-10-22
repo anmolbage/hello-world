@@ -23,7 +23,7 @@ class PinActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pin)
         prefs = PrefsManager(this)
-        isSettingPin = !prefs.isPinSet()
+        isSettingPin = !prefs.isPinSet() || intent.getBooleanExtra(EXTRA_CHANGE_PIN, false)
         tvPrompt = findViewById(R.id.tvPinPrompt)
         tvError = findViewById(R.id.tvError)
         dots = listOf(findViewById(R.id.dot1), findViewById(R.id.dot2), findViewById(R.id.dot3), findViewById(R.id.dot4))
@@ -73,7 +73,12 @@ class PinActivity : AppCompatActivity() {
     private fun showError(message: String) { tvError.text = message; tvError.visibility = View.VISIBLE }
     private fun resetInput() { enteredPin.clear(); updateDots() }
     private fun navigateToApp() {
+        if (intent.getBooleanExtra(EXTRA_CHANGE_PIN, false)) { finish(); return }
         startActivity(Intent(this, if (!prefs.isGeofenceSet()) GeofenceSetupActivity::class.java else MainActivity::class.java))
         finish()
+    }
+
+    companion object {
+        const val EXTRA_CHANGE_PIN = "extra_change_pin"
     }
 }

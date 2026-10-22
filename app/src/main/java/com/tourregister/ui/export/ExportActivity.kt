@@ -31,7 +31,8 @@ class ExportActivity : AppCompatActivity() {
 
     private var startDate: String = ""
     private var endDate: String = ""
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private val utcDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).apply { timeZone = TimeZone.getTimeZone("UTC") }
+    private val localDateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +81,7 @@ class ExportActivity : AppCompatActivity() {
             .build()
 
         picker.addOnPositiveButtonClickListener { millis ->
-            val date = dateFormat.format(Date(millis))
+            val date = utcDateFormat.format(Date(millis))
             if (isStart) {
                 startDate = date
                 findViewById<MaterialButton>(R.id.btnStartDate).text = DateUtils.formatDate(date)
@@ -96,17 +97,17 @@ class ExportActivity : AppCompatActivity() {
     private fun setThisWeek() {
         val cal = Calendar.getInstance()
         cal.set(Calendar.DAY_OF_WEEK, cal.firstDayOfWeek)
-        startDate = dateFormat.format(cal.time)
+        startDate = localDateFormat.format(cal.time)
         cal.add(Calendar.DAY_OF_WEEK, 6)
-        endDate = dateFormat.format(cal.time)
+        endDate = localDateFormat.format(cal.time)
     }
 
     private fun setThisMonth() {
         val cal = Calendar.getInstance()
         cal.set(Calendar.DAY_OF_MONTH, 1)
-        startDate = dateFormat.format(cal.time)
+        startDate = localDateFormat.format(cal.time)
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH))
-        endDate = dateFormat.format(cal.time)
+        endDate = localDateFormat.format(cal.time)
     }
 
     private fun exportExcel() {

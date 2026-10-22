@@ -45,7 +45,7 @@ class SettingsFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnChangePin).setOnClickListener {
-            startActivity(Intent(requireContext(), PinActivity::class.java))
+            startActivity(Intent(requireContext(), PinActivity::class.java).apply { putExtra(PinActivity.EXTRA_CHANGE_PIN, true) })
         }
 
         view.findViewById<MaterialButton>(R.id.btnExportSettings).setOnClickListener {

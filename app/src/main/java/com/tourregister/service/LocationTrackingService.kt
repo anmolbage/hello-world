@@ -155,5 +155,9 @@ class LocationTrackingService : Service() {
         getSystemService(android.app.NotificationManager::class.java).notify(NOTIFICATION_ID, createNotification(text))
     }
 
-    override fun onDestroy() { super.onDestroy(); scope.cancel(); fusedLocationClient.removeLocationUpdates(locationCallback) }
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
+        if (::locationCallback.isInitialized) fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
 }

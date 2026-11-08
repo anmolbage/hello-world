@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent" android:layout_height="wrap_content" app:cardCornerRadius="@dimen/card_corner" app:cardElevation="@dimen/card_elevation"
+    android:layout_marginBottom="12dp">
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="16dp">
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+            <TextView android:id="@+id/tvPurpose" android:layout_width="wrap_content" android:layout_height="28dp" android:gravity="center"
+                android:paddingStart="12dp" android:paddingEnd="12dp" android:background="@drawable/purpose_badge_bg"
+                android:textColor="@color/on_primary" android:textSize="12sp" android:textStyle="bold" />
+            <View android:layout_width="0dp" android:layout_height="0dp" android:layout_weight="1" />
+            <TextView android:id="@+id/tvVisitDate" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:textSize="12sp" android:textColor="@color/on_surface_secondary" />
+        </LinearLayout>
+        <TextView android:id="@+id/tvVisitTime" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:textSize="@dimen/text_body" android:textStyle="bold" android:textColor="@color/on_surface" android:layout_marginBottom="4dp" />
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+            <TextView android:id="@+id/tvVisitDuration" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="  •  " android:textColor="@color/on_surface_secondary" />
+            <TextView android:id="@+id/tvVisitDistance" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="14sp" android:textColor="@color/on_surface_secondary" />
+        </LinearLayout>
+        <TextView android:id="@+id/tvVisitAddress" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="14sp" android:textColor="@color/on_surface" android:maxLines="2" android:ellipsize="end" />
+        <TextView android:id="@+id/tvVisitNotes" android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:textSize="13sp" android:textColor="@color/on_surface_secondary" android:fontFamily="sans-serif-light"
+            android:layout_marginTop="4dp" android:maxLines="2" android:ellipsize="end" android:visibility="gone" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
